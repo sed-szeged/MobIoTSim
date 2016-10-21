@@ -130,7 +130,7 @@ public class CloudSettingsActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.organizatio_id_et)).setText(organizationId);
         }
 
-        if(!type.equals("BLUEMIX")){
+        if(type != null && !type.equals("BLUEMIX")){
 
                 ((EditText) findViewById(R.id.app_id_et)).setVisibility(View.GONE);
                 ((EditText) findViewById(R.id.token_et)).setVisibility(View.GONE);

@@ -71,19 +71,29 @@ public class CloudActivity extends AppCompatActivity {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(CloudActivity.this);
                 builder.setTitle("Select a Cloud Type");
-                String cloudTypes[] = {"Bluemix Demo", "Bluemix"};
-                builder.setSingleChoiceItems(cloudTypes, 0, new DialogInterface.OnClickListener() {
+                final String cloudTypes[] = {"Bluemix Demo", "Bluemix"};
+                builder.setItems(cloudTypes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(CloudActivity.this, CloudSettingsActivity.class);
 
+                        Bundle bundle = new Bundle();
+
+                        switch (which) {
+                            case 0:
+                                bundle.putString(CloudSettingsActivity.KEY_TYPE, CloudSettingsWrapper.CSType.BLUEMIX_DEMO.toString());
+                                bundle.putString(CloudSettingsActivity.KEY_ORGATNISATION_ID, "quickstart");
+                                break;
+                            case 1:
+                                bundle.putString(CloudSettingsActivity.KEY_TYPE, CloudSettingsWrapper.CSType.BLUEMIX.toString());
+                                break;
+                        }
+
+                        intent.putExtras(bundle);
+                        startActivityForResult(intent, ADD_CLOUD_SETTINGS_REQ_CODE);
                     }
                 });
-                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
 
-                    }
-                });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -101,9 +111,36 @@ public class CloudActivity extends AppCompatActivity {
                 Intent intent = new Intent(CloudActivity.this, CloudSettingsActivity.class);
                 Bundle bundle = new Bundle();
 
-                //bundle.putString(CloudSettingsActivity.KEY_TYPE_ID, deviceAdapter.getItem(i).getTypeID());
+                int position = ((Spinner) findViewById(R.id.cloud_providers_spinner)).getSelectedItemPosition();
 
-                //bundle.putString(DeviceSettingsActivity.KEY_EDIT_IT, String.valueOf( i ));
+                bundle.putString(CloudSettingsActivity.KEY_TYPE,
+                        cloudSettingsWrappers.get(position).getType().toString());
+
+                if (cloudSettingsWrappers.get(position).getType() == CloudSettingsWrapper.CSType.BLUEMIX_DEMO) {
+                    bundle.putString(CloudSettingsActivity.KEY_ORGATNISATION_ID,
+                            "quickstart");
+
+                    bundle.putString(CloudSettingsActivity.KEY_ORGATNISATION_ID,
+                            "myBluemix");
+                } else {
+
+                    bundle.putString(CloudSettingsActivity.KEY_ORGATNISATION_ID,
+                            cloudSettingsWrappers.get(position).getOrganizationID());
+
+                    bundle.putString(CloudSettingsActivity.KEY_APPLICATION_ID,
+                            cloudSettingsWrappers.get(position).getApplicationID());
+
+                    bundle.putString(CloudSettingsActivity.KEY_AUTH_TOKEN,
+                            cloudSettingsWrappers.get(position).getAuthToken());
+
+                    bundle.putString(CloudSettingsActivity.KEY_AUTH_KEY,
+                            cloudSettingsWrappers.get(position).getAuthKey());
+                }
+
+                bundle.putString(CloudSettingsActivity.KEY_NAME,
+                        cloudSettingsWrappers.get(position).getName());
+
+                bundle.putInt(DeviceSettingsActivity.KEY_EDIT_IT, position);
 
                 intent.putExtras(bundle);
                 startActivityForResult(intent, EDIT_CLOUD_SETTINGS_REQ_CODE);
