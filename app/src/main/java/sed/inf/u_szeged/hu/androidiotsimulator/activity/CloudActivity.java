@@ -164,8 +164,6 @@ public class CloudActivity extends AppCompatActivity {
             wrappers.add(demoBluemix);
             CloudSettingsWrapper myBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "myBluemix", "wg3go6", false, 1883, "mobiotsim", "", "");
             wrappers.add(myBluemix);
-            //CloudSettingsWrapper myBluemix2 = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "myBluemix2", "2wg3go62", false, 1883);
-            //wrappers.add(myBluemix2);
             //CloudSettingsWrapper myAzure = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.AZURE, "myAzure", "myAzure", false);
             //wrappers.add(myAzure);
         }
