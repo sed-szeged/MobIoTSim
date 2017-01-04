@@ -22,6 +22,7 @@
         <item>Custom</item>
         <item>Temperature</item>
         <item>Humidity</item>
+        <item>Thermostat</item>
     </string-array>
 
     <string name="title_activity_devices">DevicesActivity</string>
