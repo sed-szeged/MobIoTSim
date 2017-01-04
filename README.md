@@ -77,5 +77,24 @@ https://github.com/sed-szeged/MobIoTSimBluemixGateway
 
 <img src="https://github.com/sed-szeged/MobIoTSim/raw/master/docs/visualisation.png" width="720">
 
+#UPDATE
+####V1.1
+New way to select device type
+
+<img src="https://github.com/sed-szeged/MobIoTSim/raw/master/docs/device_type.png" width="240">
+
+More real life like data generation. Instead of random data, we increase or decrease the previous value.
+
+<img src="https://github.com/sed-szeged/MobIoTSim/raw/master/docs/data.png" width="720">
+
+A device can send more parameters at the same time.
+
+<img src="https://github.com/sed-szeged/MobIoTSim/raw/master/docs/more_param.png" width="240">
+
+The devices can be saved to a file.
+( /Android/data/sed.inf.u_szeged.hu.androidiotsimulator/files/SavedDevices )
+
+New device type: thermostat.
+<img src="https://github.com/sed-szeged/MobIoTSim/raw/master/docs/thermostat.png" width="240">
 
 
