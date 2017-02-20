@@ -22,14 +22,6 @@ public class SensorDataWrapper {
         this.sensorDataList = sensorDataList;
     }
 
-    public void addSensor(SensorData sd) {
-        sensorDataList.add(sd);
-    }
-
-    public List<SensorData> getList() {
-        return sensorDataList;
-    }
-
     public static SensorDataWrapper sensorDataFromSerial(String s) {
         SensorDataWrapper sensorDataWrapper = new SensorDataWrapper();
         StringTokenizer st = new StringTokenizer(s, "*");
@@ -48,6 +40,13 @@ public class SensorDataWrapper {
         return sensorDataWrapper;
     }
 
+    public void addSensor(SensorData sd) {
+        sensorDataList.add(sd);
+    }
+
+    public List<SensorData> getList() {
+        return sensorDataList;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();

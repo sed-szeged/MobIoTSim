@@ -9,9 +9,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".activity.IoTSimulatorActivity"
-    tools:showIn="@layout/activity_io_tsimulator">
-
+    tools:context=".activity.main.IoTSimulatorActivity"
+    tools:showIn="@layout/activity_iot_simulator">
 
 
     <LinearLayout
@@ -24,30 +23,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:padding="20dp"
             android:layout_margin="10dp"
-            android:text="Cloud settings"/>
+            android:padding="20dp"
+            android:text="@string/cloud_settings_btn" />
 
         <Button
             android:id="@+id/goto_devices_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:padding="20dp"
             android:layout_margin="10dp"
-            android:text="Devices"/>
+            android:padding="20dp"
+            android:text="@string/devices_btn" />
 
         <Button
             android:id="@+id/informations_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:padding="20dp"
             android:layout_margin="30dp"
-            android:text="Information"/>
+            android:padding="20dp"
+            android:text="@string/information_btn" />
 
     </LinearLayout>
-
 
 
 </RelativeLayout>

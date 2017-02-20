@@ -1,38 +1,41 @@
-package sed.inf.u_szeged.hu.androidiotsimulator.activity;
+package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringTokenizer;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.ParameterAdapter;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.device.Device;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorData;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.JsonDevice;
@@ -46,25 +49,14 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     public static final String KEY_TYPE_ID = "TYPE_ID";
     public static final String KEY_DEVICE_ID = "KEY_DEVICE_ID";
     public static final String KEY_TOKEN = "TOKEN";
-
     public static final String KEY_TYPE = "TYPE";
     public static final String KEY_FREQ = "FREQ";
-
     public static final String KEY_EDIT_IT = "EDIT_IT";
-
     public static final String KEY_SENSORS = "SENSORS";
-
+    public static final String KEY_REPLAY_LOCATION = "REPLAYLOCATION";
     public static final int MSG_W_DELETE_PARAMETER = 39;
-
-    String editId;
-
-    ExpandedListView listView;
+    private static final int IMPORT_REPLAY_LOCATION_REQ_CODE = 6544;
     private static ParameterAdapter adapter;
-    File myExternalFile;
-
-    Gson gson = new Gson();
-
-
     public Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -78,15 +70,61 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         }
     };
+    String editId;
+    ExpandedListView listView;
+    File myExternalFile;
+    Gson gson = new Gson();
+    String replayFileLocation;
+    Switch aSwitch;
+
+    private static boolean isExternalStorageReadOnly() {
+        String extStorageState = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isExternalStorageAvailable() {
+        String extStorageState = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
+            return true;
+        }
+        return false;
+    }
 
     private void deleteParamter(int position) {
-
         System.out.println("DELETE " + adapter.getItem(position));
-        //devices.remove(position);
         adapter.remove(adapter.getItem(position));
         adapter.notifyDataSetChanged();
-        //saveDevices();
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == IMPORT_REPLAY_LOCATION_REQ_CODE) {
+            if (resultCode == RESULT_OK) {
+                if (data != null) {
+                    // Get the URI of the selected file
+                    final Uri uri = data.getData();
+                    System.out.println("Uri = " + uri.toString());
+                    try {
+                        // Get the file path from the URI
+                        final String path = FileUtils.getPath(this, uri);
+                        Toast.makeText(DeviceSettingsActivity.this,
+                                "File imported: " + path, Toast.LENGTH_LONG).show();
+                        replayFileLocation = path;
+                        System.out.print("replayFileLocation= " + replayFileLocation);
+                        ((TextView) findViewById(R.id.replay_import_location)).setText(replayFileLocation);
+                    } catch (Exception e) {
+                        System.out.println("DeviceSettingsActivity" + " File select error" + e);
+                    }
+                }
+            }
+
+        }
     }
 
     @Override
@@ -96,12 +134,28 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         MobIoTApplication.setActivity(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.title);
-        setSupportActionBar(toolbar);
-
         listView = (ExpandedListView) findViewById(R.id.list);
         SensorDataWrapper sdw;
+
+        aSwitch = (Switch) findViewById(R.id.sw_random);
+        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton cb, boolean on) {
+                if (on) {
+                    //Do something when Switch button is on/checked
+                    replayFileLocation = "random";
+                    findViewById(R.id.parameter_container).setVisibility(View.VISIBLE);
+                    findViewById(R.id.replay_container).setVisibility(View.GONE);
+
+                } else {
+                    //Do something when Switch is off/unchecked
+                    findViewById(R.id.parameter_container).setVisibility(View.GONE);
+                    findViewById(R.id.replay_container).setVisibility(View.VISIBLE);
+
+
+                }
+            }
+        });
 
         final Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -156,45 +210,19 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.save_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    myExternalFile = new File(getExternalFilesDir("SavedDevices"), ((EditText) findViewById(R.id.device_id_et)).getText() + ".json");
-                    FileOutputStream fos = new FileOutputStream(myExternalFile);
-                    //String outputString = getSerial(bundle);
-
-                    JsonDevice jsonDevice = new JsonDevice();
-                    jsonDevice.setOrganizationId(bundle.getString(KEY_ORGANIZATION_ID));
-                    jsonDevice.setDeviceId(((EditText) findViewById(R.id.device_id_et)).getText().toString());
-                    jsonDevice.setTypeId(((EditText) findViewById(R.id.type_id_et)).getText().toString());
-                    jsonDevice.setToken(((EditText) findViewById(R.id.token_et)).getText().toString());
-                    jsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
-                    jsonDevice.setCommand("cmd");
-                    jsonDevice.setStatus("status");
-                    jsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
-
-                    List<Sensor> list = new ArrayList<>();
-                    SensorDataWrapper sensorDataWrapper = new SensorDataWrapper(adapter.getResult());
-                    for (SensorData sd : sensorDataWrapper.getList()) {
-                        Sensor sensor = new Sensor();
-                        sensor.setName(sd.getName());
-                        sensor.setMin(Integer.valueOf(sd.getMinValue()));
-                        sensor.setMax(Integer.valueOf(sd.getMaxValue()));
-                        list.add(sensor);
-                    }
-
-                    jsonDevice.setSensors(list);
-
-                    String outputString = gson.toJson(jsonDevice);
-                    fos.write(outputString.getBytes());
-                    fos.close();
-                    Toast.makeText(DeviceSettingsActivity.this, "File saved: " + ((EditText) findViewById(R.id.device_id_et)).getText() + ".json", Toast.LENGTH_SHORT).show();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                saveDeviceToJson();
 
 
             }
         });
+
+        ((Button) findViewById(R.id.replay_import_btn)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showFileChooser();
+            }
+        });
+
 
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
             ((Button) findViewById(R.id.save_btn)).setEnabled(false);
@@ -218,6 +246,86 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
     }
 
+    private void saveDeviceToJson() {
+        try {
+            myExternalFile = new File(getExternalFilesDir("SavedDevices"), ((EditText) findViewById(R.id.device_id_et)).getText() + ".json");
+            FileOutputStream fos = new FileOutputStream(myExternalFile);
+
+            JsonDevice jsonDevice = new JsonDevice();
+            jsonDevice.setOrganizationId((String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem());
+            jsonDevice.setDeviceId(((EditText) findViewById(R.id.device_id_et)).getText().toString());
+            jsonDevice.setTypeId(((EditText) findViewById(R.id.type_id_et)).getText().toString());
+            jsonDevice.setToken(((EditText) findViewById(R.id.token_et)).getText().toString());
+            jsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
+            jsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
+
+            List<Sensor> list = new ArrayList<>();
+            SensorDataWrapper sensorDataWrapper = new SensorDataWrapper(adapter.getResult());
+            for (SensorData sd : sensorDataWrapper.getList()) {
+                Sensor sensor = new Sensor();
+                sensor.setName(sd.getName());
+                sensor.setMin(Integer.valueOf(sd.getMinValue()));
+                sensor.setMax(Integer.valueOf(sd.getMaxValue()));
+                list.add(sensor);
+            }
+
+            jsonDevice.setSensors(list);
+            jsonDevice.setReplayFileLocation(replayFileLocation); //TODO: // FIXME: 1/27/2017
+
+            String outputString = gson.toJson(jsonDevice);
+            fos.write(outputString.getBytes());
+            fos.close();
+            Toast.makeText(DeviceSettingsActivity.this, "File saved: " + ((EditText) findViewById(R.id.device_id_et)).getText() + ".json", Toast.LENGTH_SHORT).show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ArrayList<String> loadOrganizationIds() {
+        String clouds = MobIoTApplication.loadData(MobIoTApplication.KEY_CLOUDS);
+        System.out.println("clouds: " + clouds);
+        ArrayList<String> orgIds = new ArrayList<>();
+
+        if (clouds != null && !clouds.equals("")) {
+            StringTokenizer st = new StringTokenizer(clouds, "<");
+            while (st.hasMoreTokens()) {
+                String cloudSerial = st.nextToken();
+                orgIds.add(CloudSettingsWrapper.fromSerial(cloudSerial).getOrganizationID());
+            }
+        } else {
+            // orgIds.add("null");
+        }
+
+        return orgIds;
+    }
+
+    private void initOrgIdSpinner(String defaultOrgId) {
+        Spinner spinner = (Spinner) findViewById(R.id.orgid_spinner);
+        ArrayList<String> organizationIds = loadOrganizationIds();
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, organizationIds);
+        // Specify the layout to use when the list of choices appears
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(spinnerAdapter);
+        int selectedPos = organizationIds.indexOf(defaultOrgId);
+        spinner.setSelection(selectedPos);
+
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Nothing to do here
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
 
     private void initTypeSpinner(int selectedPos) {
         Spinner spinner = (Spinner) findViewById(R.id.type_spinner);
@@ -295,6 +403,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         String type_id = ((EditText) findViewById(R.id.type_id_et)).getText().toString();
         String device_id = ((EditText) findViewById(R.id.device_id_et)).getText().toString();
         String token = ((EditText) findViewById(R.id.token_et)).getText().toString();
+        String organization_id = (String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem();
         String type = (String) ((Spinner) findViewById(R.id.type_spinner)).getSelectedItem();
         String freq = ((EditText) findViewById(R.id.freq_value_et)).getText().toString();
         SensorDataWrapper paramResults = new SensorDataWrapper(adapter.getResult());
@@ -303,16 +412,20 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 "\ntype_id:" + type_id +
                 "\ndevice_id:" + device_id +
                 "\ntoken:" + token +
+                "\norganization_id:" + organization_id +
                 "\ntype:" + type +
                 "\nfreq:" + freq +
-                "\nsensordata: " + paramResults);
+                "\nsensordata: " + paramResults +
+                "\nreplaylocation:" + replayFileLocation);
 
         bundle.putString(KEY_TYPE_ID, type_id);
         bundle.putString(KEY_DEVICE_ID, device_id);
         bundle.putString(KEY_TOKEN, token);
+        bundle.putString(KEY_ORGANIZATION_ID, organization_id);
         bundle.putString(KEY_TYPE, type);
         bundle.putString(KEY_FREQ, freq);
         bundle.putString(KEY_SENSORS, paramResults.toString());
+        bundle.putString(KEY_REPLAY_LOCATION, replayFileLocation);
 
         if (editId != null) {
             bundle.putString(KEY_EDIT_IT, editId);
@@ -337,6 +450,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.token_et)).setText(token);
         }
 
+        initOrgIdSpinner(bundle.getString(KEY_ORGANIZATION_ID));
+
+
         String type = bundle.getString(KEY_TYPE);
         String[] deviceTypes = getResources().getStringArray(R.array.device_types);
         for (int i = 0; i < deviceTypes.length; i++) {
@@ -356,6 +472,18 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         }
 
 
+        if (!Objects.equals(bundle.getString(KEY_REPLAY_LOCATION), "random")) {
+            aSwitch.setChecked(false);
+            ((TextView) findViewById(R.id.replay_import_location)).setText(bundle.getString(KEY_REPLAY_LOCATION));
+
+            //    ((TextView) findViewById(R.id.replay_import_location)).setText("ooooooo");
+            replayFileLocation = bundle.getString(KEY_REPLAY_LOCATION);
+            //findViewById(R.id.replay_import_btn).setVisibility(View.VISIBLE);
+            //((LinearLayout) findViewById(R.id.replay_container)).setVisibility(View.VISIBLE);
+        } else {
+            replayFileLocation = "random";
+        }
+
         System.out.println("setData " +
                 "\ntype_id:" + type_id +
                 "\ndevice_id:" + device_id +
@@ -364,44 +492,18 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     }
 
 
-    private static boolean isExternalStorageReadOnly() {
-        String extStorageState = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
-            return true;
+    private void showFileChooser() {
+        // Use the GET_CONTENT intent from the utility class
+        Intent target = FileUtils.createGetContentIntent();
+        // Create the chooser Intent
+        Intent intent = Intent.createChooser(
+                target, "choose file");
+        try {
+            startActivityForResult(intent, IMPORT_REPLAY_LOCATION_REQ_CODE);
+        } catch (ActivityNotFoundException e) {
+            // The reason for the existence of aFileChooser
+            System.out.println("Can't show the file chooser: " + e);
         }
-        return false;
-    }
-
-    private static boolean isExternalStorageAvailable() {
-        String extStorageState = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
-            return true;
-        }
-        return false;
-    }
-
-
-    public String getSerial(Bundle bundle) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(bundle.getString(KEY_ORGANIZATION_ID));
-        sb.append("|");
-        sb.append(((EditText) findViewById(R.id.type_id_et)).getText());
-        sb.append("|");
-        sb.append(((EditText) findViewById(R.id.device_id_et)).getText());
-        sb.append("|");
-        sb.append(((EditText) findViewById(R.id.token_et)).getText());
-        sb.append("|");
-        sb.append(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem());
-        sb.append("|");
-        sb.append("cmd");
-        sb.append("|");
-        sb.append("status");
-        sb.append("|");
-        sb.append(((EditText) findViewById(R.id.freq_value_et)).getText());
-        sb.append("|");
-        sb.append(new SensorDataWrapper(adapter.getResult()));
-
-        return sb.toString();
     }
 
 

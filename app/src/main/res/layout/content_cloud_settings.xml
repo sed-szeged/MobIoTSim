@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="sed.inf.u_szeged.hu.androidiotsimulator.activity.CloudSettingsActivity"
+    tools:context="sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity"
     tools:showIn="@layout/activity_cloud_settings">
 
     <LinearLayout
@@ -17,29 +17,26 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
+
+        <LinearLayout
+            android:id="@+id/type_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="Cloud settings"/>
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:id="@+id/type_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_weight="0"
-            android:layout_height="wrap_content"
-            android:text="Type:"/>
-        <TextView
-            android:id="@+id/type"
-            android:layout_width="wrap_content"
-            android:layout_weight="0"
-            android:layout_height="wrap_content"
-            android:text=""/>
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/type" />
+
+            <TextView
+                android:id="@+id/type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="" />
+        </LinearLayout>
 
         <LinearLayout
 
@@ -47,36 +44,42 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_weight="0"
                 android:layout_height="wrap_content"
-                android:text="Name:"/>
+                android:layout_weight="0"
+                android:text="@string/name" />
+
             <EditText
                 android:id="@+id/name_et"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                android:layout_weight="1"
+                android:inputType="text"
+                android:text="" />
         </LinearLayout>
 
 
         <LinearLayout
-            android:id="@+id/organizatio_id_container"
+            android:id="@+id/organization_id_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:layout_height="wrap_content"
-                android:text="Organization ID:"/>
+                android:text="@string/organization_id" />
+
             <EditText
-                android:id="@+id/organizatio_id_et"
+                android:id="@+id/organization_id_et"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                android:layout_weight="1"
+                android:inputType="text"
+                android:text="" />
         </LinearLayout>
 
         <LinearLayout
@@ -85,17 +88,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_weight="0"
                 android:layout_height="wrap_content"
-                android:text="Application ID:"/>
+                android:layout_weight="0"
+                android:text="@string/application_id" />
+
             <EditText
                 android:id="@+id/app_id_et"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                android:layout_weight="1"
+                android:inputType="text"
+                android:text="" />
         </LinearLayout>
 
         <LinearLayout
@@ -104,17 +110,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_weight="0"
                 android:layout_height="wrap_content"
-                android:text="Auth key:"/>
+                android:layout_weight="0"
+                android:text="@string/auth_key" />
+
             <EditText
                 android:id="@+id/key_et"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                android:layout_weight="1"
+                android:inputType="text"
+                android:text="" />
         </LinearLayout>
 
         <LinearLayout
@@ -123,17 +132,64 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_weight="0"
                 android:layout_height="wrap_content"
-                android:text="Auth token:"/>
+                android:layout_weight="0"
+                android:text="@string/auth_token" />
+
             <EditText
                 android:id="@+id/token_et"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                android:layout_weight="1"
+                android:inputType="text"
+                android:text="" />
+        </LinearLayout>
+
+        <LinearLayout
+
+            android:id="@+id/command_id_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/command_id" />
+
+            <EditText
+                android:id="@+id/command_id_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="text"
+                android:text="" />
+        </LinearLayout>
+
+        <LinearLayout
+
+            android:id="@+id/event_id_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/event_id" />
+
+            <EditText
+                android:id="@+id/event_id_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="text"
+                android:text="" />
         </LinearLayout>
 
 
@@ -143,36 +199,39 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_weight="0"
                 android:layout_height="wrap_content"
-                android:text="Connection type:"/>
+                android:layout_weight="0"
+                android:text="@string/connection_type" />
+
             <Spinner
                 android:id="@+id/connection_type_spinner"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
                 android:enabled="false"
-                android:entries="@array/connection_types"
-            </Spinner>
+                android:entries="@array/connection_types" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:visibility="gone"
             android:id="@+id/show_url_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Full URL:"/>
+                android:text="@string/full_url" />
+
             <TextView
                 android:id="@+id/show_url_et"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="tcp://quickstart.messaging.internetofthings.ibmcloud.com:1883"/>
+                android:text="@string/template_url" />
         </LinearLayout>
 
         <RelativeLayout
@@ -184,22 +243,20 @@
                 android:id="@+id/ok_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
                 android:layout_margin="10dp"
-                android:text="OK"/>
+                android:padding="10dp"
+                android:text="@string/ok_btn" />
 
             <Button
                 android:id="@+id/cancel_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:layout_margin="10dp"
-                android:text="Cancel"
                 android:layout_alignParentRight="true"
-                />
+                android:layout_margin="10dp"
+                android:padding="10dp"
+                android:text="@string/cancel_btn" />
 
         </RelativeLayout>
-
 
 
     </LinearLayout>

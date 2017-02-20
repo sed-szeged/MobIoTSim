@@ -1,26 +1,23 @@
-package sed.inf.u_szeged.hu.androidiotsimulator.activity;
+package sed.inf.u_szeged.hu.androidiotsimulator.activity.main;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesActivity;
 
 public class IoTSimulatorActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_io_tsimulator);
+        setContentView(R.layout.activity_iot_simulator);
 
         MobIoTApplication.setActivity(this);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.title);
-        setSupportActionBar(toolbar);
 
         findViewById(R.id.goto_cloud_settings_btn).setOnClickListener(new View.OnClickListener() {
             @Override

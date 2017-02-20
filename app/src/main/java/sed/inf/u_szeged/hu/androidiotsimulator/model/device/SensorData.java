@@ -19,30 +19,6 @@ public class SensorData {
         this.minValue = minValue;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getMaxValue() {
-        return maxValue;
-    }
-
-    public String getMinValue() {
-        return minValue;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setMaxValue(String maxValue) {
-        this.maxValue = maxValue;
-    }
-
-    public void setMinValue(String minValue) {
-        this.minValue = minValue;
-    }
-
     public static SensorData fromString(String str) {
         StringTokenizer innerToken = new StringTokenizer(str, "+");
 
@@ -51,6 +27,30 @@ public class SensorData {
         String max = innerToken.nextToken();
 
         return new SensorData(name, min, max);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getMaxValue() {
+        return maxValue;
+    }
+
+    public void setMaxValue(String maxValue) {
+        this.maxValue = maxValue;
+    }
+
+    public String getMinValue() {
+        return minValue;
+    }
+
+    public void setMinValue(String minValue) {
+        this.minValue = minValue;
     }
 
     public String toString() {

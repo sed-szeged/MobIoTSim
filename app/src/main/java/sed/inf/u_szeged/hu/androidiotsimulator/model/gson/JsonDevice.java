@@ -1,11 +1,10 @@
-
 package sed.inf.u_szeged.hu.androidiotsimulator.model.gson;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JsonDevice {
 
@@ -24,18 +23,15 @@ public class JsonDevice {
     @SerializedName("type")
     @Expose
     private String type;
-    @SerializedName("command")
-    @Expose
-    private String command;
-    @SerializedName("status")
-    @Expose
-    private String status;
     @SerializedName("freq")
     @Expose
     private Double freq;
     @SerializedName("sensors")
     @Expose
     private List<Sensor> sensors = new ArrayList<Sensor>();
+    @SerializedName("replayFileLocation")
+    @Expose
+    private String replayFileLocation;
 
     /**
      * @return The organizationId
@@ -108,34 +104,6 @@ public class JsonDevice {
     }
 
     /**
-     * @return The command
-     */
-    public String getCommand() {
-        return command;
-    }
-
-    /**
-     * @param command The command
-     */
-    public void setCommand(String command) {
-        this.command = command;
-    }
-
-    /**
-     * @return The status
-     */
-    public String getStatus() {
-        return status;
-    }
-
-    /**
-     * @param status The status
-     */
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    /**
      * @return The freq
      */
     public Double getFreq() {
@@ -161,6 +129,20 @@ public class JsonDevice {
      */
     public void setSensors(List<Sensor> sensors) {
         this.sensors = sensors;
+    }
+
+    /**
+     * @return The replayFileLocation
+     */
+    public String getReplayFileLocation() {
+        return replayFileLocation;
+    }
+
+    /**
+     * @param replayFileLocation The replayFileLocation
+     */
+    public void setReplayFileLocation(String replayFileLocation) {
+        this.replayFileLocation = replayFileLocation;
     }
 
 }
