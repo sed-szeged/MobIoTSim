@@ -5,10 +5,10 @@ package sed.inf.u_szeged.hu.androidiotsimulator.views;
  *  
  */
 
-        import android.content.Context;
-        import android.graphics.Canvas;
-        import android.util.AttributeSet;
-        import android.widget.ListView;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.util.AttributeSet;
+import android.widget.ListView;
 
 public class ExpandedListView extends ListView {
 

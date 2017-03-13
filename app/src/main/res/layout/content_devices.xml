@@ -9,75 +9,69 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".activity.DevicesActivity"
+    tools:context=".activity.device.DevicesActivity"
     tools:showIn="@layout/activity_devices">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:layout_weight="0"
-            android:text="Devices"/>
+        android:orientation="vertical">
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
-                android:visibility="invisible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Device ID"/>
+                android:text="@string/device_id"
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/import_device_btn"
                 android:layout_width="147dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:text="Import device"/>
+                android:text="@string/import_device_btn" />
 
             <Button
                 android:id="@+id/add_new_device_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:text="Add new device"/>
+                android:text="@string/add_new_device_btn" />
         </LinearLayout>
 
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="horizontal" android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/device_id"
-                android:visibility="invisible"
-                android:layout_width="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Device ID"/>
+                android:layout_weight="1"
+                android:text="@string/device_id"
+                android:visibility="invisible" />
 
 
             <View
                 android:layout_width="1dp"
-                android:layout_height="50dp"/>
+                android:layout_height="50dp" />
 
             <ImageView
-                android:visibility="gone"
                 android:id="@+id/warning"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/red_warning"
                 android:layout_margin="5dp"
-                />
+                android:contentDescription="@string/warning_icon"
+                android:src="@drawable/red_warning"
+                android:visibility="gone" />
 
 
             <Button
@@ -85,24 +79,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
-                android:text="Start all"/>
+                android:text="@string/start_all_btn" />
 
             <Button
                 android:id="@+id/stop_all_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
-                android:text="Stop all"
-                />
+                android:text="@string/stop_all_btn" />
 
 
             <Button
                 android:id="@+id/delete_all_btn"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@android:drawable/ic_delete"
                 android:layout_margin="5dp"
-                />
+                android:background="@android:drawable/ic_delete" />
 
         </LinearLayout>
 
@@ -111,37 +103,34 @@
             android:id="@+id/devices_lv"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
-        </ListView>
+            android:layout_weight="1" />
 
         <LinearLayout
-            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <Button
                 android:id="@+id/import_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:text="Import devices"/>
+                android:text="@string/import_devices_btn" />
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="1dp"
-                android:layout_weight="1"
-                />
+                android:layout_weight="1" />
 
             <Button
                 android:id="@+id/export_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:text="Export devices"/>
+                android:text="@string/export_devices_btn" />
 
         </LinearLayout>
-
 
 
     </LinearLayout>

@@ -1,4 +1,3 @@
-
 package sed.inf.u_szeged.hu.androidiotsimulator.model.gson;
 
 import com.google.gson.annotations.Expose;

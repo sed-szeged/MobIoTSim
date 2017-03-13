@@ -2,28 +2,25 @@ package sed.inf.u_szeged.hu.androidiotsimulator;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
 import android.content.SharedPreferences;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * Created by Tomi on 2016. 02. 11..
  */
 public class MobIoTApplication extends Application {
 
-    static Activity activity;
-
-    static SharedPreferences sharedPreferences;
-
-    public static final String KEY_TYPE = "TYPE";
-    public static final String KEY_ORGATNISATION_ID = "ORGATNISATION_ID";
-    public static final String KEY_APPLICATION_ID = "APPLICATION_ID";
-    public static final String KEY_AUTH_KEY = "AUTH_KEY";
-    public static final String KEY_AUTH_TOKEN = "AUTH_TOKEN";
-    public static final String KEY_CONNECTION_TYPE = "CONNECTION_TYPE";
-
+    // Required for saving clouds and Devices
     public static final String KEY_CLOUDS = "CLOUDS";
     public static final String KEY_DEVICES = "DEVICES";
 
+    static Activity activity;
+    static SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate() {
@@ -31,27 +28,50 @@ public class MobIoTApplication extends Application {
         sharedPreferences = getSharedPreferences("sed.inf.u_szeged.hu.androidiotsimulator", MODE_PRIVATE);
     }
 
-    public static void setActivity(Activity activity){
-        MobIoTApplication.activity = activity;
-    }
-
-    public static Activity getActivity(){
+    public static Activity getActivity() {
         return activity;
     }
 
-    public static void saveData(String key, String data){
+    public static void setActivity(Activity activity) {
+        MobIoTApplication.activity = activity;
+    }
+
+    // Method for saving data to the shared preferences
+    public static void saveData(String key, String data) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(key, new String(data));
         editor.commit();
     }
 
-    public static String loadData(String key){
+    // Loading data from shared preferences
+    public static String loadData(String key) {
         String d = sharedPreferences.getString(key, null);
-        if(d==null){
+        if (d == null) {
             return null;
-        }else{
+        } else {
             return new String(d);
         }
+    }
+
+    public static String convertStreamToString(InputStream is) throws Exception {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+
+        }
+        reader.close();
+        return sb.toString();
+    }
+
+    public static String getStringFromFile(String filePath) throws Exception {
+        File fl = new File(filePath);
+        FileInputStream fin = new FileInputStream(fl);
+        String ret = convertStreamToString(fin);
+        fin.close();
+        return ret;
+
     }
 
 }

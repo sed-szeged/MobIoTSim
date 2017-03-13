@@ -15,7 +15,7 @@ import java.util.Objects;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.DevicesActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.Device;
 
 /**
@@ -101,7 +101,7 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
                     @Override
                     public void onClick(View v) {
                         if (d.isRunning()) {
-                            d.stop();
+                            d.stop(getContext());
                             startBtn.setText("Start");
                             editBtn.setEnabled(true);
                         } else {

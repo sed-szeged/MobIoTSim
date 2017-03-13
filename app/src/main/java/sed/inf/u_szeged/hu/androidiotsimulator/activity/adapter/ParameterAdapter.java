@@ -14,8 +14,7 @@ import java.util.List;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.DeviceSettingsActivity;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.DevicesActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DeviceSettingsActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorData;
 
 /**
@@ -28,17 +27,6 @@ public class ParameterAdapter extends ArrayAdapter<SensorData> implements View.O
     private List<SensorData> dataSet;
     private Context mContext;
 
-    @Override
-    public void onClick(View view) {
-
-    }
-
-    private static class ViewHolder {
-        TextView paramName;
-        EditText maxInput;
-        EditText minInput;
-    }
-
     public ParameterAdapter(List<SensorData> data, Context context) {
         super(context, R.layout.parameter_layout, data);
         this.dataSet = data;
@@ -46,21 +34,22 @@ public class ParameterAdapter extends ArrayAdapter<SensorData> implements View.O
 
     }
 
+    @Override
+    public void onClick(View view) {
+
+    }
 
     public int getCount() {
         return dataSet.size();
     }
 
-
     public long getItemId(int position) {
         return position;
     }
 
-
     public List<SensorData> getResult() {
         return dataSet;
     }
-
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
@@ -135,6 +124,12 @@ public class ParameterAdapter extends ArrayAdapter<SensorData> implements View.O
 
         // Return the completed view to render on screen
         return convertView;
+    }
+
+    private static class ViewHolder {
+        TextView paramName;
+        EditText maxInput;
+        EditText minInput;
     }
 
 

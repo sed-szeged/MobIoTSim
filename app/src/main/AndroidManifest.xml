@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="sed.inf.u_szeged.hu.androidiotsimulator">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -14,11 +14,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.IoTSimulatorActivity"
+            android:name=".activity.main.IoTSimulatorActivity"
             android:configChanges="orientation"
-            android:label="@string/app_name"
+            android:label="@string/title"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,35 +26,35 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.CloudActivity"
+            android:name=".activity.cloud.CloudActivity"
             android:configChanges="orientation"
-            android:label="@string/title_activity_cloud_settings"
+            android:label="@string/title_activity_cloud"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme" />
         <activity
-            android:name=".activity.DevicesActivity"
+            android:name=".activity.device.DevicesActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_devices"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme" />
         <activity
-            android:name=".activity.DeviceSettingsActivity"
+            android:name=".activity.device.DeviceSettingsActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_device_settings"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme" />
         <activity
-            android:name=".activity.CloudSettingsActivity"
+            android:name=".activity.cloud.CloudSettingsActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_cloud_settings"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme" />
         <activity
-            android:name=".activity.InformationActivity"
+            android:name=".activity.main.InformationActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_information"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

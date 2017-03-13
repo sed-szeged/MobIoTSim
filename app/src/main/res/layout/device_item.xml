@@ -1,44 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-<!--
-    <TextView
-        android:id="@+id/type_id"
-        android:layout_width="wrap_content"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:text="Type ID"/>
--->
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
     <ImageView
-        android:visibility="visible"
         android:id="@+id/swtich"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/ic_off_circle"
         android:layout_margin="4dp"
-        />
+        android:src="@drawable/ic_off_circle"
+        android:visibility="visible" />
 
     <TextView
         android:id="@+id/device_id"
         android:layout_width="wrap_content"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:text="Device ID"/>
+        android:layout_weight="1"
+        android:text="@string/device_id_alt" />
 
 
     <View
         android:layout_width="1dp"
-        android:layout_height="50dp"/>
+        android:layout_height="50dp" />
 
     <ImageView
-        android:visibility="gone"
         android:id="@+id/warning"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/red_warning"
         android:layout_margin="4dp"
-        />
+        android:src="@drawable/red_warning"
+        android:visibility="gone" />
 
 
     <Button
@@ -46,23 +38,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
-        android:text="Start"/>
+        android:text="@string/start_btn" />
 
     <Button
         android:id="@+id/edit_btn"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:background="@android:drawable/ic_menu_edit"
         android:layout_margin="4dp"
-        />
+        android:background="@android:drawable/ic_menu_edit" />
 
 
     <Button
         android:id="@+id/delete_btn"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:background="@android:drawable/ic_delete"
         android:layout_margin="4dp"
-        />
+        android:background="@android:drawable/ic_delete" />
 
 </LinearLayout>

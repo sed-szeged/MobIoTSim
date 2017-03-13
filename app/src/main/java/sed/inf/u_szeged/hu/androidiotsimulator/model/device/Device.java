@@ -1,11 +1,12 @@
 package sed.inf.u_szeged.hu.androidiotsimulator.model.device;
 
-import android.hardware.Sensor;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -17,24 +18,32 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 import java.util.StringTokenizer;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.DeviceSettingsActivity;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.DevicesActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DeviceSettingsActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.Generic;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.JsonDevice;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.replay.CompleteReplay;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.replay.Value;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.replay.ValueWrapper;
 
 public class Device implements Runnable, MqttCallback {
 
+    volatile boolean isRunning = false;
+    Gson gson = new Gson();
     private String type;
-
     @Expose
     private MqttClient client;
-
     @Expose
     private
     Random random;
@@ -42,35 +51,34 @@ public class Device implements Runnable, MqttCallback {
     private String typeID;
     private String deviceID;
     private String token;
-
+    // TODO: remove this two
     private String commandID;
     private String eventID;
-
+    //data generation
+    private String replayFileLocation;
     //String format;
     private boolean warning = false;
-    //data generation
-
     private int[] prevValue;
     private double freq;
-
     private SensorDataWrapper sensors;
-
-    volatile boolean isRunning = false;
-
     private boolean isOn = false;
+    private int replayCounter;
+
+    private CompleteReplay clog;
+
+    private Generic replayData;
 
 
-    public Device(String organizationID, String typeID, String deviceID, String token, String type, String commandID, String eventID, double freq, SensorDataWrapper sensors) {
+    public Device(String organizationID, String typeID, String deviceID, String token, String type, double freq, SensorDataWrapper sensors, String replayFileLocation) {
         this.organizationID = organizationID;
         this.token = token;
-        this.commandID = commandID;
-        this.eventID = eventID;
         this.typeID = typeID;
         this.type = type;
         this.deviceID = deviceID;
         this.prevValue = new int[sensors.getList().size()];
         this.freq = freq;
         this.sensors = sensors;
+        this.replayFileLocation = replayFileLocation;
 
         this.random = new Random();
 
@@ -78,6 +86,12 @@ public class Device implements Runnable, MqttCallback {
             prevValue[j] = (Integer.parseInt(sensors.getList().get(j).getMaxValue()) + Integer.parseInt(sensors.getList().get(j).getMinValue())) / 2;
         }
 
+        if (!Objects.equals(replayFileLocation, "random")) {
+            replayData = getReplayFromJson();
+            replayCounter = 0;
+        } else {
+            replayData = null;
+        }
 
     }
 
@@ -89,13 +103,11 @@ public class Device implements Runnable, MqttCallback {
         String deviceID = st.nextToken();
         String token = st.nextToken();
         String type = st.nextToken();
-        String commandID = st.nextToken();
-        String eventID = st.nextToken();
         double freq = Double.parseDouble(st.nextToken());
         SensorDataWrapper sensorDataWrapper = SensorDataWrapper.sensorDataFromSerial(st.nextToken());
+        String replayFileLocation = st.nextToken();
 
-
-        Device d = new Device(organizationID, typeID, deviceID, token, type, commandID, eventID, freq, sensorDataWrapper);
+        Device d = new Device(organizationID, typeID, deviceID, token, type, freq, sensorDataWrapper, replayFileLocation);
         return d;
     }
 
@@ -106,18 +118,17 @@ public class Device implements Runnable, MqttCallback {
         String deviceID = jsonDevice.getDeviceId();
         String token = jsonDevice.getToken();
         String type = jsonDevice.getType();
-        String commandID = jsonDevice.getCommand();
-        String eventID = jsonDevice.getStatus();
         double freq = Double.parseDouble(String.valueOf(jsonDevice.getFreq()));
 
         SensorDataWrapper sensorDataWrapper = new SensorDataWrapper();
-        for ( sed.inf.u_szeged.hu.androidiotsimulator.model.gson.Sensor s : jsonDevice.getSensors()) {
+        for (sed.inf.u_szeged.hu.androidiotsimulator.model.gson.Sensor s : jsonDevice.getSensors()) {
             SensorData sd = new SensorData(s.getName(), String.valueOf(s.getMin()), String.valueOf(s.getMax()));
             sensorDataWrapper.addSensor(sd);
         }
 
+        String replayFileLocation = jsonDevice.getReplayFileLocation();
 
-        Device d = new Device(organizationID, typeID, deviceID, token, type, commandID, eventID, freq, sensorDataWrapper);
+        Device d = new Device(organizationID, typeID, deviceID, token, type, freq, sensorDataWrapper, replayFileLocation);
         return d;
 
     }
@@ -131,9 +142,12 @@ public class Device implements Runnable, MqttCallback {
 
         client.setCallback(this);
 
+
         if (!organizationID.equals("quickstart")) {
             bluemixQuickstartSubscribe();
         }
+
+        clog = new CompleteReplay();
 
         while (isRunning) {
             try {
@@ -157,13 +171,45 @@ public class Device implements Runnable, MqttCallback {
         }
     }
 
-    public void stop() {
+    public void stop(Context ctx) {
         isRunning = false;
+        if (replayFileLocation.equals("random")) {
+            saveLog(ctx);
+        }
+    }
+
+    private void saveLog(Context ctx) {
+        String saveResult = "{";
+        saveResult += "\"cnt\" : " + clog.getLenght() + ", \"list\" : " + clog + "}";
+        System.out.println("Clog: " + clog);
+        System.out.println("SaveResult: " + saveResult);
+
+        SimpleDateFormat s = new SimpleDateFormat("yyyyMMddhhmmss", Locale.getDefault());
+        String format = s.format(new Date());
+        String fileName = deviceID + "_" + format + ".json";
+
+        try {
+            File myExternalFile = new File(ctx.getExternalFilesDir("DeviceReplays"), fileName);
+            FileOutputStream fos = new FileOutputStream(myExternalFile);
+
+            fos.write(saveResult.getBytes());
+            fos.close();
+            Toast.makeText(ctx, "Replay saved as: " + fileName, Toast.LENGTH_SHORT).show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void bluemixQuickstartConnect() {
         //String broker       = "tcp://quickstart.messaging.internetofthings.ibmcloud.com:1883";
         //String broker       = "tcp://quickstart.messaging.internetofthings.ibmcloud.com:1883";
+
+        commandID = MobIoTApplication.loadData(CloudSettingsActivity.KEY_COMMAND_ID);
+        System.out.println("commandID:" + commandID);
+
+        eventID = MobIoTApplication.loadData(CloudSettingsActivity.KEY_EVENT_ID);
+        System.out.println("eventID:" + eventID);
 
         //TODO SSL
         String broker_prefix = "tcp://";
@@ -232,15 +278,39 @@ public class Device implements Runnable, MqttCallback {
         StringBuilder newContent = new StringBuilder();
         newContent.append("{ \"d\" : { ");
 
-        int pos = 0;
-        for (SensorData s : sensors.getList()) {
-            newContent.append("\"" + s.getName() + "\" : " + dataGenerator(pos, Integer.parseInt(s.getMinValue()), Integer.parseInt(s.getMaxValue())));
-            if (!s.equals(sensors.getList().get(sensors.getList().size() - 1))) {
-                newContent.append(" , ");
-            }
-            pos++;
+        if (replayFileLocation.equals("random")) {
+            int pos = 0;
+            ValueWrapper valueWrapper = new ValueWrapper();
+            for (SensorData s : sensors.getList()) {
+                String value = String.valueOf(dataGenerator(pos, Integer.parseInt(s.getMinValue()), Integer.parseInt(s.getMaxValue())));
+                newContent.append("\"" + s.getName() + "\" : " + value);
+                if (!s.equals(sensors.getList().get(sensors.getList().size() - 1))) {
+                    newContent.append(" , ");
+                }
+                pos++;
 
+                Value logValue = new Value(s.getName(), value);
+                valueWrapper.addValue(logValue);
+
+            }
+            clog.addLog(valueWrapper);
+        } else {
+
+            int i = replayCounter % replayData.getCnt();
+
+            String x = replayData.getList().get(i).toString();
+            x = x.substring(1, x.length() - 1);
+            x = x.replaceAll("=", "\" : ");
+            x = x.replaceAll(", ", ", \"");
+            x = "\"" + x;
+            System.out.println(x);
+            newContent.append(x);
+
+
+            replayCounter++;
         }
+
+        //newContent.append("\"main\": {\"temp\": 8,\"pressure\": 1020,\"humidity\": 75,\"temp_min\": 8,\"temp_max\": 8\t}");
 
 
         newContent.append(" } }");
@@ -307,13 +377,13 @@ public class Device implements Runnable, MqttCallback {
 
                         bundle.putString(DeviceSettingsActivity.KEY_FREQ, String.valueOf(freq));
                         bundle.putString(DeviceSettingsActivity.KEY_SENSORS, sensors.toString());
+                        bundle.putString(DeviceSettingsActivity.KEY_REPLAY_LOCATION, replayFileLocation);
                         msg.setData(bundle);
                         msg.setTarget(((DevicesActivity) MobIoTApplication.getActivity()).handler);
                         msg.sendToTarget();
                     }
                 }
             }.execute(null, null, null);
-
 
 
             if (random.nextInt(3) == 0) {
@@ -358,6 +428,10 @@ public class Device implements Runnable, MqttCallback {
         return warning;
     }
 
+    public void setWarning(boolean w) {
+        this.warning = w;
+    }
+
     public String getOrganizationID() {
         return organizationID;
     }
@@ -370,12 +444,8 @@ public class Device implements Runnable, MqttCallback {
         return type;
     }
 
-    public String getCommandID() {
-        return commandID;
-    }
-
-    public String getEventID() {
-        return eventID;
+    public String getReplayFileLocation() {
+        return replayFileLocation;
     }
 
     public double getFreq() {
@@ -386,11 +456,7 @@ public class Device implements Runnable, MqttCallback {
         return sensors;
     }
 
-    public void setWarning(boolean w) {
-        this.warning = w;
-    }
-
-    public boolean isOn(){
+    public boolean isOn() {
         return isOn;
     }
 
@@ -437,6 +503,7 @@ public class Device implements Runnable, MqttCallback {
 
                         bundle.putString(DeviceSettingsActivity.KEY_FREQ, String.valueOf(freq));
                         bundle.putString(DeviceSettingsActivity.KEY_SENSORS, sensors.toString());
+                        bundle.putString(DeviceSettingsActivity.KEY_REPLAY_LOCATION, replayFileLocation);
                         msg.setData(bundle);
                         msg.setTarget(((DevicesActivity) MobIoTApplication.getActivity()).handler);
                         msg.sendToTarget();
@@ -454,6 +521,23 @@ public class Device implements Runnable, MqttCallback {
             }
             */
         }
+    }
+
+    private Generic getReplayFromJson() {
+
+        Generic obj = null;
+        try {
+
+            System.out.println("JsonString: " + MobIoTApplication.getStringFromFile(replayFileLocation));
+
+            String jsonStr = MobIoTApplication.getStringFromFile(replayFileLocation);
+            obj = gson.fromJson(jsonStr, Generic.class);
+
+        } catch (Exception e) {
+            System.out.println("Device" + " File select error" + e);
+        }
+        return obj;
+
     }
 
     @Override
@@ -501,6 +585,10 @@ public class Device implements Runnable, MqttCallback {
                 return false;
             }
 
+            if (other.getReplayFileLocation() != replayFileLocation) {
+                return false;
+            }
+
             return true;
         } else {
             return false;
@@ -519,13 +607,11 @@ public class Device implements Runnable, MqttCallback {
         sb.append("|");
         sb.append(type);
         sb.append("|");
-        sb.append(commandID);
-        sb.append("|");
-        sb.append(eventID);
-        sb.append("|");
         sb.append(freq);
         sb.append("|");
         sb.append(sensors);
+        sb.append("|");
+        sb.append(replayFileLocation);
         return sb.toString();
     }
 
@@ -538,10 +624,9 @@ public class Device implements Runnable, MqttCallback {
                 ", deviceID='" + deviceID + '\'' +
                 ", token='" + token + '\'' +
                 ", type='" + type + '\'' +
-                ", commandID='" + commandID + '\'' +
-                ", eventID='" + eventID + '\'' +
                 ", freq=" + freq + '\'' +
-                ", freq=" + sensors +
+                ", sensors='" + sensors +
+                ", replayFileLocation='" + replayFileLocation +
                 '}';
     }
 }
