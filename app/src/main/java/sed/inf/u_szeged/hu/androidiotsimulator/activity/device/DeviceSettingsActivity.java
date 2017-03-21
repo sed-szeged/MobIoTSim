@@ -3,6 +3,7 @@ package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -38,7 +39,7 @@ import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.ParameterAdapter
 import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorData;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.JsonDevice;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.GsonDevice;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.Sensor;
 import sed.inf.u_szeged.hu.androidiotsimulator.views.ExpandedListView;
 
@@ -53,9 +54,10 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     public static final String KEY_FREQ = "FREQ";
     public static final String KEY_EDIT_IT = "EDIT_IT";
     public static final String KEY_SENSORS = "SENSORS";
-    public static final String KEY_REPLAY_LOCATION = "REPLAYLOCATION";
+    public static final String KEY_TRACE_LOCATION = "TRACELOCATION";
+    public static final String KEY_NUM_OF_DEVICES = "NUM_OF_DEVICES";
     public static final int MSG_W_DELETE_PARAMETER = 39;
-    private static final int IMPORT_REPLAY_LOCATION_REQ_CODE = 6544;
+    private static final int IMPORT_TRACE_LOCATION_REQ_CODE = 6544;
     private static ParameterAdapter adapter;
     public Handler handler = new Handler() {
         @Override
@@ -74,8 +76,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     ExpandedListView listView;
     File myExternalFile;
     Gson gson = new Gson();
-    String replayFileLocation;
+    String traceFileLocation;
     Switch aSwitch;
+    Resources res;
 
     private static boolean isExternalStorageReadOnly() {
         String extStorageState = Environment.getExternalStorageState();
@@ -104,7 +107,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == IMPORT_REPLAY_LOCATION_REQ_CODE) {
+        if (requestCode == IMPORT_TRACE_LOCATION_REQ_CODE) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
                     // Get the URI of the selected file
@@ -115,9 +118,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                         final String path = FileUtils.getPath(this, uri);
                         Toast.makeText(DeviceSettingsActivity.this,
                                 "File imported: " + path, Toast.LENGTH_LONG).show();
-                        replayFileLocation = path;
-                        System.out.print("replayFileLocation= " + replayFileLocation);
-                        ((TextView) findViewById(R.id.replay_import_location)).setText(replayFileLocation);
+                        traceFileLocation = path;
+                        System.out.print("traceFileLocation= " + traceFileLocation);
+                        ((TextView) findViewById(R.id.trace_import_location)).setText(traceFileLocation);
                     } catch (Exception e) {
                         System.out.println("DeviceSettingsActivity" + " File select error" + e);
                     }
@@ -134,6 +137,8 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         MobIoTApplication.setActivity(this);
 
+        res = getResources();
+
         listView = (ExpandedListView) findViewById(R.id.list);
         SensorDataWrapper sdw;
 
@@ -143,14 +148,14 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton cb, boolean on) {
                 if (on) {
                     //Do something when Switch button is on/checked
-                    replayFileLocation = "random";
+                    traceFileLocation = "random";
                     findViewById(R.id.parameter_container).setVisibility(View.VISIBLE);
-                    findViewById(R.id.replay_container).setVisibility(View.GONE);
+                    findViewById(R.id.trace_container).setVisibility(View.GONE);
 
                 } else {
                     //Do something when Switch is off/unchecked
                     findViewById(R.id.parameter_container).setVisibility(View.GONE);
-                    findViewById(R.id.replay_container).setVisibility(View.VISIBLE);
+                    findViewById(R.id.trace_container).setVisibility(View.VISIBLE);
 
 
                 }
@@ -166,7 +171,10 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         } else {
             System.out.println("else");
-            sdw = SensorDataWrapper.sensorDataFromSerial("empty1+1+5*empty2+-1+30");
+            String paramName = res.getString(R.string.new_paramter_name);
+            String min = String.valueOf(res.getInteger(R.integer.new_parameter_min));
+            String max = String.valueOf(res.getInteger(R.integer.new_parameter_max));
+            sdw = SensorDataWrapper.sensorDataFromSerial(paramName + "+" + min + "+" + max);
             System.out.println("DeviceSettingsActivity bundle null");
             initTypeSpinner(0);
 
@@ -202,7 +210,10 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.add_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.add(new SensorData("empty", "0", "0"));
+                String paramName = res.getString(R.string.new_paramter_name);
+                String min = String.valueOf(res.getInteger(R.integer.new_parameter_min));
+                String max = String.valueOf(res.getInteger(R.integer.new_parameter_max));
+                adapter.add(new SensorData(paramName, min, max));
             }
         });
 
@@ -216,7 +227,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             }
         });
 
-        ((Button) findViewById(R.id.replay_import_btn)).setOnClickListener(new View.OnClickListener() {
+        ((Button) findViewById(R.id.trace_import_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showFileChooser();
@@ -248,16 +259,18 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
     private void saveDeviceToJson() {
         try {
-            myExternalFile = new File(getExternalFilesDir("SavedDevices"), ((EditText) findViewById(R.id.device_id_et)).getText() + ".json");
+            String fileName = "base_" + ((EditText) findViewById(R.id.device_id_et)).getText() + ".json";
+            myExternalFile = new File(getExternalFilesDir("SavedDevices"), fileName);
             FileOutputStream fos = new FileOutputStream(myExternalFile);
 
-            JsonDevice jsonDevice = new JsonDevice();
-            jsonDevice.setOrganizationId((String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem());
-            jsonDevice.setDeviceId(((EditText) findViewById(R.id.device_id_et)).getText().toString());
-            jsonDevice.setTypeId(((EditText) findViewById(R.id.type_id_et)).getText().toString());
-            jsonDevice.setToken(((EditText) findViewById(R.id.token_et)).getText().toString());
-            jsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
-            jsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
+            GsonDevice gsonDevice = new GsonDevice();
+            gsonDevice.setOrganizationId((String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem());
+            gsonDevice.setDeviceId(((EditText) findViewById(R.id.device_id_et)).getText().toString());
+            gsonDevice.setTypeId(((EditText) findViewById(R.id.type_id_et)).getText().toString());
+            gsonDevice.setToken(((EditText) findViewById(R.id.token_et)).getText().toString());
+            gsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
+            gsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
+            gsonDevice.setNumOfDevices(Integer.parseInt(((EditText) findViewById(R.id.numofdevices_et)).getText().toString()));
 
             List<Sensor> list = new ArrayList<>();
             SensorDataWrapper sensorDataWrapper = new SensorDataWrapper(adapter.getResult());
@@ -269,13 +282,13 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 list.add(sensor);
             }
 
-            jsonDevice.setSensors(list);
-            jsonDevice.setReplayFileLocation(replayFileLocation); //TODO: // FIXME: 1/27/2017
+            gsonDevice.setSensors(list);
+            gsonDevice.setTraceFileLocation(traceFileLocation); //TODO: // FIXME: 1/27/2017
 
-            String outputString = gson.toJson(jsonDevice);
+            String outputString = gson.toJson(gsonDevice);
             fos.write(outputString.getBytes());
             fos.close();
-            Toast.makeText(DeviceSettingsActivity.this, "File saved: " + ((EditText) findViewById(R.id.device_id_et)).getText() + ".json", Toast.LENGTH_SHORT).show();
+            Toast.makeText(DeviceSettingsActivity.this, "File saved: " + fileName, Toast.LENGTH_SHORT).show();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -344,38 +357,25 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
                 EditText freqET = (EditText) findViewById(R.id.freq_value_et);
-//                EditText minET = (EditText)findViewById(R.id.min_value_et);
-//                EditText maxET = (EditText)findViewById(R.id.max_value_et);
 
                 switch (position) {
                     case 0:
                         freqET.setEnabled(true);
-//                        minET.setEnabled(true);
-//                        maxET.setEnabled(true);
+
                         break;
                     case 1:
                         freqET.setText("1.0");
                         freqET.setEnabled(false);
-//                        minET.setText("-25");
-//                        minET.setEnabled(false);
-//                        minET.setText("25");
-//                        maxET.setEnabled(false);
+
                         break;
                     case 2:
                         freqET.setText("10.0");
                         freqET.setEnabled(false);
-//                        minET.setText("25");
-//                        minET.setEnabled(false);
-//                        minET.setText("85");
-//                        maxET.setEnabled(false);
+
                         break;
                     case 3:
                         freqET.setText("1.0");
                         freqET.setEnabled(false);
-//                        minET.setText("-25");
-//                        minET.setEnabled(false);
-//                        minET.setText("25");
-//                        maxET.setEnabled(false);
                         break;
 
                 }
@@ -406,6 +406,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         String organization_id = (String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem();
         String type = (String) ((Spinner) findViewById(R.id.type_spinner)).getSelectedItem();
         String freq = ((EditText) findViewById(R.id.freq_value_et)).getText().toString();
+        String num = ((EditText) findViewById(R.id.numofdevices_et)).getText().toString();
         SensorDataWrapper paramResults = new SensorDataWrapper(adapter.getResult());
 
         System.out.println("getData " +
@@ -414,18 +415,20 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 "\ntoken:" + token +
                 "\norganization_id:" + organization_id +
                 "\ntype:" + type +
+                "\nnum: " + num +
                 "\nfreq:" + freq +
                 "\nsensordata: " + paramResults +
-                "\nreplaylocation:" + replayFileLocation);
+                "\ntracelocation:" + traceFileLocation);
 
         bundle.putString(KEY_TYPE_ID, type_id);
         bundle.putString(KEY_DEVICE_ID, device_id);
         bundle.putString(KEY_TOKEN, token);
         bundle.putString(KEY_ORGANIZATION_ID, organization_id);
+        bundle.putString(KEY_NUM_OF_DEVICES, num);
         bundle.putString(KEY_TYPE, type);
         bundle.putString(KEY_FREQ, freq);
         bundle.putString(KEY_SENSORS, paramResults.toString());
-        bundle.putString(KEY_REPLAY_LOCATION, replayFileLocation);
+        bundle.putString(KEY_TRACE_LOCATION, traceFileLocation);
 
         if (editId != null) {
             bundle.putString(KEY_EDIT_IT, editId);
@@ -471,17 +474,20 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.freq_value_et)).setText(freq);
         }
 
+        String numOfDevices = bundle.getString(KEY_NUM_OF_DEVICES);
+        if (numOfDevices != null && !numOfDevices.trim().equals("")) {
+            ((EditText) findViewById(R.id.numofdevices_et)).setText(numOfDevices);
+        }
 
-        if (!Objects.equals(bundle.getString(KEY_REPLAY_LOCATION), "random")) {
+
+        if (!Objects.equals(bundle.getString(KEY_TRACE_LOCATION), "random")) {
             aSwitch.setChecked(false);
-            ((TextView) findViewById(R.id.replay_import_location)).setText(bundle.getString(KEY_REPLAY_LOCATION));
+            ((TextView) findViewById(R.id.trace_import_location)).setText(bundle.getString(KEY_TRACE_LOCATION));
 
-            //    ((TextView) findViewById(R.id.replay_import_location)).setText("ooooooo");
-            replayFileLocation = bundle.getString(KEY_REPLAY_LOCATION);
-            //findViewById(R.id.replay_import_btn).setVisibility(View.VISIBLE);
-            //((LinearLayout) findViewById(R.id.replay_container)).setVisibility(View.VISIBLE);
+            traceFileLocation = bundle.getString(KEY_TRACE_LOCATION);
+
         } else {
-            replayFileLocation = "random";
+            traceFileLocation = "random";
         }
 
         System.out.println("setData " +
@@ -499,7 +505,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         Intent intent = Intent.createChooser(
                 target, "choose file");
         try {
-            startActivityForResult(intent, IMPORT_REPLAY_LOCATION_REQ_CODE);
+            startActivityForResult(intent, IMPORT_TRACE_LOCATION_REQ_CODE);
         } catch (ActivityNotFoundException e) {
             // The reason for the existence of aFileChooser
             System.out.println("Can't show the file chooser: " + e);

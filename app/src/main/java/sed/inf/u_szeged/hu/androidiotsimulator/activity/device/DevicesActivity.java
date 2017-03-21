@@ -3,6 +3,7 @@ package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,11 +27,12 @@ import java.util.StringTokenizer;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.DeviceAdapter;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.DeviceGroupAdapter;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.Device;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.device.DeviceGroup;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.JsonDevice;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.GsonDevice;
 
 public class DevicesActivity extends AppCompatActivity {
 
@@ -43,8 +45,8 @@ public class DevicesActivity extends AppCompatActivity {
     public static final int MSG_W_SWITCH = 52;
     private static final int IMPORT_DEVICE_REQ_CODE = 6384;
 
-    List<Device> devices;
-    DeviceAdapter deviceAdapter;
+    List<DeviceGroup> deviceGroupList;
+    DeviceGroupAdapter deviceGroupAdapter;
     public Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -72,26 +74,32 @@ public class DevicesActivity extends AppCompatActivity {
     Gson gson = new Gson();
 
     private void warning(Bundle data) {
-        int count = deviceAdapter.getCount();
+        int count = deviceGroupAdapter.getCount();
         for (int i = 0; i < count; i++) {
-            Device d = deviceAdapter.getItem(i);
-            if (d.getDeviceID().equals(data.get(DeviceSettingsActivity.KEY_DEVICE_ID))) {
-                d.setWarning(true);
-                break;
+            DeviceGroup deviceGroup = deviceGroupAdapter.getItem(i);
+            for (Device d : deviceGroup.getDevicesList()) {
+                if (d.getDeviceID().equals(data.get(DeviceSettingsActivity.KEY_DEVICE_ID))) {
+                    d.setWarning(true);
+                    break;
+                }
             }
         }
-        deviceAdapter.notifyDataSetInvalidated();
+        deviceGroupAdapter.notifyDataSetInvalidated();
     }
 
     private void switchIt() {
-        deviceAdapter.notifyDataSetInvalidated();
+        deviceGroupAdapter.notifyDataSetInvalidated();
     }
 
 
     private void delete(int position) {
-        System.out.println("DELETE " + deviceAdapter.getItem(position));
-        devices.remove(position);
-        deviceAdapter.notifyDataSetChanged();
+        System.out.println("DELETE " + deviceGroupAdapter.getItem(position));
+        DeviceGroup deviceGroup = deviceGroupList.get(position);
+
+        deviceGroup.removeFromCloud();
+
+        deviceGroupList.remove(position);
+        deviceGroupAdapter.notifyDataSetChanged();
         saveDevicesToPrefs();
     }
 
@@ -105,15 +113,16 @@ public class DevicesActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DeviceSettingsActivity.class);
         Bundle bundle = new Bundle();
 
-        bundle.putString(DeviceSettingsActivity.KEY_ORGANIZATION_ID, deviceAdapter.getItem(i).getOrganizationID());
-        bundle.putString(DeviceSettingsActivity.KEY_TYPE_ID, deviceAdapter.getItem(i).getTypeID());
-        bundle.putString(DeviceSettingsActivity.KEY_DEVICE_ID, deviceAdapter.getItem(i).getDeviceID());
-        bundle.putString(DeviceSettingsActivity.KEY_TOKEN, deviceAdapter.getItem(i).getToken());
-        bundle.putString(DeviceSettingsActivity.KEY_TYPE, deviceAdapter.getItem(i).getType());
-        bundle.putString(DeviceSettingsActivity.KEY_FREQ, String.valueOf(deviceAdapter.getItem(i).getFreq()));
-        bundle.putString(DeviceSettingsActivity.KEY_SENSORS, String.valueOf(deviceAdapter.getItem(i).getSensors()));
+        bundle.putString(DeviceSettingsActivity.KEY_ORGANIZATION_ID, deviceGroupAdapter.getItem(i).getBaseDevice().getOrganizationID());
+        bundle.putString(DeviceSettingsActivity.KEY_TYPE_ID, deviceGroupAdapter.getItem(i).getBaseDevice().getTypeID());
+        bundle.putString(DeviceSettingsActivity.KEY_DEVICE_ID, deviceGroupAdapter.getItem(i).getBaseDevice().getDeviceID());
+        bundle.putString(DeviceSettingsActivity.KEY_TOKEN, deviceGroupAdapter.getItem(i).getBaseDevice().getToken());
+        bundle.putString(DeviceSettingsActivity.KEY_TYPE, deviceGroupAdapter.getItem(i).getBaseDevice().getType());
+        bundle.putString(DeviceSettingsActivity.KEY_FREQ, String.valueOf(deviceGroupAdapter.getItem(i).getBaseDevice().getFreq()));
+        bundle.putString(DeviceSettingsActivity.KEY_SENSORS, String.valueOf(deviceGroupAdapter.getItem(i).getBaseDevice().getSensors()));
         bundle.putString(DeviceSettingsActivity.KEY_EDIT_IT, String.valueOf(i));
-        bundle.putString(DeviceSettingsActivity.KEY_REPLAY_LOCATION, deviceAdapter.getItem(i).getReplayFileLocation());
+        bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, deviceGroupAdapter.getItem(i).getBaseDevice().getTraceFileLocation());
+        bundle.putString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES, String.valueOf(deviceGroupAdapter.getItem(i).getBaseDevice().getNumOfDevices()));
 
         intent.putExtras(bundle);
         startActivityForResult(intent, EDIT_DEVICE_SETTINGS_REQ_CODE);
@@ -125,75 +134,100 @@ public class DevicesActivity extends AppCompatActivity {
         //TODO: Fix this
         if (requestCode == ADD_DEVICE_SETTINGS_REQ_CODE) {
             if (resultCode == RESULT_OK) {
-                Bundle bundle = data.getExtras();
-                if (bundle != null) {
-                    System.out.println("onActivityResult add bundle " + bundle.toString());
-
-                    Device device = getDeviceFromBundle(bundle);
-                    System.out.println("Add device: " + device.toString());
-                    deviceAdapter.add(device);
-                    deviceAdapter.notifyDataSetChanged();
-                    saveDevicesToPrefs();
-                } else {
-                    System.out.println("onActivityResult add bundle NULL");
-                }
+                addDeviceActivityResult(data);
             }
         }
 
         if (requestCode == EDIT_DEVICE_SETTINGS_REQ_CODE) {
             if (resultCode == RESULT_OK) {
-                Bundle bundle = data.getExtras();
-                if (bundle != null) {
-                    System.out.println("onActivityResult edit bundle " + bundle.toString());
-                    Device device = getDeviceFromBundle(bundle);
-                    Integer position = Integer.parseInt(bundle.getString(DeviceSettingsActivity.KEY_EDIT_IT));
-
-                    if (devices.get(position).equals(device)) {
-                        System.out.println("NOT Edited");
-                        return;
-                    }
-
-                    System.out.println("Edit device from " + position + " : " + deviceAdapter.getItem(position));
-                    System.out.println("Edit device to: " + device);
-                    devices.add(position, device);
-                    devices.remove(position + 1);
-                    deviceAdapter.notifyDataSetChanged();
-                    saveDevicesToPrefs();
-                } else {
-                    System.out.println("onActivityResult edit bundle NULL");
-                }
+                if (editDeviceActivityResult(data)) return;
             }
         }
 
         if (requestCode == IMPORT_DEVICE_REQ_CODE) {
             if (resultCode == RESULT_OK) {
-                if (data != null) {
-                    // Get the URI of the selected file
-                    final Uri uri = data.getData();
-                    System.out.println("Uri = " + uri.toString());
-                    try {
-                        // Get the file path from the URI
-                        final String path = FileUtils.getPath(this, uri);
-                        Toast.makeText(DevicesActivity.this,
-                                "File Selected: " + path, Toast.LENGTH_LONG).show();
-
-                        System.out.println(MobIoTApplication.getStringFromFile(path));
-
-                        String jsonStr = MobIoTApplication.getStringFromFile(path);
-                        JsonDevice obj = gson.fromJson(jsonStr, JsonDevice.class);
-
-                        Device importedDevice = Device.fromJson(obj);
-                        deviceAdapter.add(importedDevice);
-                        saveDevicesToPrefs();
-                    } catch (Exception e) {
-                        System.out.println("DevicesActivity" + " File select error" + e);
-                    }
-                }
+                importDeviceActivityResult(data);
             }
 
         }
 
     }
+
+    private void importDeviceActivityResult(Intent data) {
+        if (data != null) {
+            // Get the URI of the selected file
+            final Uri uri = data.getData();
+            System.out.println("Uri = " + uri.toString());
+            try {
+                // Get the file path from the URI
+                final String path = FileUtils.getPath(this, uri);
+                Toast.makeText(DevicesActivity.this,
+                        "File Selected: " + path, Toast.LENGTH_LONG).show();
+
+                System.out.println(MobIoTApplication.getStringFromFile(path));
+
+                String jsonStr = MobIoTApplication.getStringFromFile(path);
+                GsonDevice obj = gson.fromJson(jsonStr, GsonDevice.class);
+
+                Device importedBaseDevice = Device.fromJson(obj);
+                DeviceGroup deviceGroup = new DeviceGroup(importedBaseDevice);
+                deviceGroupList.add(deviceGroup);
+                deviceGroupAdapter.notifyDataSetChanged();
+
+                saveDevicesToPrefs();
+            } catch (Exception e) {
+                System.out.println("DevicesActivity" + " File select error" + e);
+            }
+        }
+    }
+
+    private boolean editDeviceActivityResult(Intent data) {
+        Bundle bundle = data.getExtras();
+        if (bundle != null) {
+            System.out.println("onActivityResult edit bundle " + bundle.toString());
+            Device device = getDeviceFromBundle(bundle);
+            Integer position = Integer.parseInt(bundle.getString(DeviceSettingsActivity.KEY_EDIT_IT));
+
+            if (deviceGroupList.get(position).getBaseDevice().equals(device)) {
+                System.out.println("NOT Edited");
+                return true;
+            }
+
+            deviceGroupList.get(position).removeFromCloud();
+
+            DeviceGroup group = new DeviceGroup(device);
+
+            System.out.println("Edit deviceGroupList from " + position + " : " + deviceGroupAdapter.getItem(position));
+            System.out.println("Edit deviceGroupList to: " + device);
+            deviceGroupList.add(position, group);
+
+            deviceGroupList.remove(position + 1);
+            deviceGroupAdapter.notifyDataSetChanged();
+            //saveDeviceToCloud(device);
+            saveDevicesToPrefs();
+        } else {
+            System.out.println("onActivityResult edit bundle NULL");
+        }
+        return false;
+    }
+
+    private void addDeviceActivityResult(Intent data) {
+        Bundle bundle = data.getExtras();
+        if (bundle != null) {
+            System.out.println("onActivityResult add bundle " + bundle.toString());
+
+            Device device = getDeviceFromBundle(bundle);
+            DeviceGroup group = new DeviceGroup(device);
+
+            System.out.println("Add deviceGroupList: " + device.toString());
+            deviceGroupAdapter.add(group);
+            deviceGroupAdapter.notifyDataSetChanged();
+            saveDevicesToPrefs();
+        } else {
+            System.out.println("onActivityResult add bundle NULL");
+        }
+    }
+
 
     @NonNull
     private Device getDeviceFromBundle(Bundle bundle) {
@@ -205,7 +239,8 @@ public class DevicesActivity extends AppCompatActivity {
                 bundle.getString(DeviceSettingsActivity.KEY_TYPE),
                 Double.parseDouble(bundle.getString(DeviceSettingsActivity.KEY_FREQ)),
                 SensorDataWrapper.sensorDataFromSerial(bundle.getString(DeviceSettingsActivity.KEY_SENSORS)),
-                bundle.getString(DeviceSettingsActivity.KEY_REPLAY_LOCATION));
+                bundle.getString(DeviceSettingsActivity.KEY_TRACE_LOCATION),
+                Integer.parseInt(bundle.getString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES)));
     }
 
     @Override
@@ -227,31 +262,31 @@ public class DevicesActivity extends AppCompatActivity {
         System.out.println("devicesStr: " + devicesStr);
 
         if (devicesStr != null && !devicesStr.equals("")) {
-            devices = new ArrayList<Device>();
+            deviceGroupList = new ArrayList<>();
             StringTokenizer st = new StringTokenizer(devicesStr, "<");
             while (st.hasMoreTokens()) {
                 String deviceSerial = st.nextToken();
-                devices.add(Device.fromSerial(deviceSerial));
+                DeviceGroup group = new DeviceGroup(Device.fromSerial(deviceSerial));
+                deviceGroupList.add(group);
             }
 
             initDevicesList();
 
         }
 
-        if (devices == null) {
-            devices = new ArrayList<>();
+        if (deviceGroupList == null) {
+            deviceGroupList = new ArrayList<>();
         }
 
-        if (devices.size() == 0) {
+        if (deviceGroupList.size() == 0) {
             System.out.println("empty devices");
             String organizationId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
-            Device d = new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice01", "RFoDC-zKRO_BJ*d+x8",
-                    "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random");
-            System.out.println("MobIoT_test01 json: " + d.getSerial());
-            devices.add(d);
-            Device d2 = new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice02", "8f3n4rE?rnA-rCF-vR",
-                    "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random");
-            devices.add(d2);
+            DeviceGroup d = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice01", "RFoDC-zKRO_BJ*d+x8",
+                    "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random",1));
+            deviceGroupList.add(d);
+            DeviceGroup d2 = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice02", "8f3n4rE?rnA-rCF-vR",
+                    "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random",1));
+            deviceGroupList.add(d2);
 
             initDevicesList();
             saveDevicesToPrefs();
@@ -278,11 +313,6 @@ public class DevicesActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        Toast.makeText(DevicesActivity.this,
-                                "OnClickListener : " +
-                                        "\nSpinner: " + String.valueOf(sp.getSelectedItem()),
-                                Toast.LENGTH_SHORT).show();
-
                         Intent intent = new Intent(DevicesActivity.this, DeviceSettingsActivity.class);
 
                         Bundle bundle = new Bundle();
@@ -291,33 +321,34 @@ public class DevicesActivity extends AppCompatActivity {
                         //TODO from resources
                         String type = "Custom";
                         double freq = 1;
+                        String paramName = "";
                         int min = 0;
-                        int max = 25;
+                        int max = 0;
+                        Resources res = getResources();
 
                         switch (String.valueOf(sp.getSelectedItem())) {
                             case "Custom":
-                                type = "Custom";
-                                freq = 1;
-                                min = 0;
-                                max = 25;
-                                break;
-                            case "Temperature":
-                                type = "Temperature";
-                                freq = 1;
-                                min = -25;
-                                max = 25;
-                                break;
-                            case "Humidity":
-                                type = "Humidity";
-                                freq = 10;
-                                min = 25;
-                                max = 85;
+                                type = getString(R.string.type_custom);
+                                paramName = getString(R.string.param_custom);
+                                min = res.getInteger(R.integer.custom_min);
+                                max = res.getInteger(R.integer.custom_max);
+                                freq = res.getInteger(R.integer.custom_frequency);
                                 break;
                             case "Thermostat":
-                                type = "Thermostat";
-                                freq = 1;
-                                min = -25;
-                                max = 25;
+                                type = getString(R.string.type_thermostat);
+                            case "Temperature":
+                                type = getString(R.string.type_temperature);
+                                paramName = getString(R.string.param_temperature);
+                                min = res.getInteger(R.integer.temp_min);
+                                max = res.getInteger(R.integer.temp_max);
+                                freq = res.getInteger(R.integer.temp_frequency);
+                                break;
+                            case "Humidity":
+                                type = getString(R.string.type_humidity);
+                                freq = res.getInteger(R.integer.humidity_frequency);
+                                paramName = getString(R.string.param_humidity);
+                                min = res.getInteger(R.integer.humidity_min);
+                                max = res.getInteger(R.integer.humidity_max);
                                 break;
 
                         }
@@ -325,9 +356,11 @@ public class DevicesActivity extends AppCompatActivity {
 
                         bundle.putString(DeviceSettingsActivity.KEY_TYPE, type);
                         bundle.putString(DeviceSettingsActivity.KEY_FREQ, Double.toString(freq));
-                        bundle.putString(DeviceSettingsActivity.KEY_SENSORS, "empty+1+10");
+                        bundle.putString(DeviceSettingsActivity.KEY_SENSORS, paramName + "+" + min + "+" + max);
+                        bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, "random");
+                        bundle.putString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES, "1");
                         intent.putExtras(bundle);
-                        bundle.putString(DeviceSettingsActivity.KEY_REPLAY_LOCATION, "random");
+
                         startActivityForResult(intent, ADD_DEVICE_SETTINGS_REQ_CODE);
                     }
                 });
@@ -357,9 +390,9 @@ public class DevicesActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.stop_all_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (Device device : devices) {
-                    device.stop(getApplicationContext());
-                    deviceAdapter.notifyDataSetChanged();
+                for (DeviceGroup deviceGroup : deviceGroupList) {
+                    deviceGroup.stopDevices(getApplicationContext());
+                    deviceGroupAdapter.notifyDataSetChanged();
                 }
             }
         });
@@ -367,11 +400,11 @@ public class DevicesActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.start_all_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (Device device : devices) {
-                    if (!device.isRunning()) {
-                        new Thread(device).start();
+                for (DeviceGroup deviceGroup : deviceGroupList) {
+                    if (!deviceGroup.isRunning()) {
+                        deviceGroup.startDevices();
                     }
-                    deviceAdapter.notifyDataSetChanged();
+                    deviceGroupAdapter.notifyDataSetChanged();
                 }
             }
         });
@@ -379,8 +412,11 @@ public class DevicesActivity extends AppCompatActivity {
         ((Button) findViewById(R.id.delete_all_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                devices.clear();
-                deviceAdapter.notifyDataSetChanged();
+                for (DeviceGroup group : deviceGroupList) {
+                    group.removeFromCloud();
+                }
+                deviceGroupList.clear();
+                deviceGroupAdapter.notifyDataSetChanged();
                 saveDevicesToPrefs();
             }
         });
@@ -388,8 +424,8 @@ public class DevicesActivity extends AppCompatActivity {
 
     private void saveDevicesToPrefs() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < deviceAdapter.getCount(); i++) {
-            Device d = deviceAdapter.getItem(i);
+        for (int i = 0; i < deviceGroupAdapter.getCount(); i++) {
+            Device d = deviceGroupAdapter.getItem(i).getBaseDevice();
             sb.append("<");
             sb.append(d.getSerial());
         }
@@ -398,9 +434,9 @@ public class DevicesActivity extends AppCompatActivity {
 
     public void initDevicesList() {
         devicesLV = (ListView) findViewById(R.id.devices_lv);
-        deviceAdapter = new DeviceAdapter(this, R.layout.device_item, devices);
-        devicesLV.setAdapter(deviceAdapter);
-        deviceAdapter.notifyDataSetChanged();
+        deviceGroupAdapter = new DeviceGroupAdapter(this, R.layout.device_item, deviceGroupList);
+        devicesLV.setAdapter(deviceGroupAdapter);
+        deviceGroupAdapter.notifyDataSetChanged();
     }
 
     private void showFileChooser() {

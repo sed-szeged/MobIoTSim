@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsonDevice {
+public class GsonDevice {
 
     @SerializedName("organizationId")
     @Expose
@@ -29,9 +29,12 @@ public class JsonDevice {
     @SerializedName("sensors")
     @Expose
     private List<Sensor> sensors = new ArrayList<Sensor>();
-    @SerializedName("replayFileLocation")
+    @SerializedName("traceFileLocation")
     @Expose
-    private String replayFileLocation;
+    private String traceFileLocation;
+    @SerializedName("numOfDevices")
+    @Expose
+    private int numOfDevices;
 
     /**
      * @return The organizationId
@@ -132,17 +135,30 @@ public class JsonDevice {
     }
 
     /**
-     * @return The replayFileLocation
+     * @return The traceFileLocation
      */
-    public String getReplayFileLocation() {
-        return replayFileLocation;
+    public String getTraceFileLocation() {
+        return traceFileLocation;
     }
 
     /**
-     * @param replayFileLocation The replayFileLocation
+     * @param traceFileLocation The traceFileLocation
      */
-    public void setReplayFileLocation(String replayFileLocation) {
-        this.replayFileLocation = replayFileLocation;
+    public void setTraceFileLocation(String traceFileLocation) {
+        this.traceFileLocation = traceFileLocation;
     }
 
+    /**
+     * @return The number of devices
+     */
+    public int getNumOfDevices() {
+        return numOfDevices;
+    }
+
+    /**
+     * @param numOfDevices The numOfDevices
+     */
+    public void setNumOfDevices(int numOfDevices) {
+        this.numOfDevices = numOfDevices;
+    }
 }

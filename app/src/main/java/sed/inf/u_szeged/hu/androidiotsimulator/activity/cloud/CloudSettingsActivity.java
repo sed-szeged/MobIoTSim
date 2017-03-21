@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.util.Arrays;
+import java.util.List;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 
@@ -26,6 +27,8 @@ public class CloudSettingsActivity extends AppCompatActivity {
     public static final String KEY_EVENT_ID = "EVENT_ID";
     public static final String KEY_COMMAND_ID = "COMMAND_ID";
     public static final String KEY_EDIT_IT = "EDIT_IT";
+    public static final String KEY_CONNECTION_PROTOCOL = "CONNECTION_PROTOCOL";
+
 
     String editId;
 
@@ -37,7 +40,6 @@ public class CloudSettingsActivity extends AppCompatActivity {
     }
 
     private void init() {
-
         Bundle bundle = getIntent().getExtras();
         editId = bundle.getString(KEY_EDIT_IT);
         setData(bundle);
@@ -45,12 +47,10 @@ public class CloudSettingsActivity extends AppCompatActivity {
         findViewById(R.id.ok_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Intent intent = new Intent();
                 intent.putExtras(getData());
                 setResult(Activity.RESULT_OK, intent);
                 finish();
-
             }
         });
 
@@ -61,7 +61,7 @@ public class CloudSettingsActivity extends AppCompatActivity {
             }
         });
 
-        Spinner spinner = (Spinner) findViewById(R.id.connection_type_spinner);
+        Spinner spinner = (Spinner) findViewById(R.id.connection_protocol_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.connection_types, android.R.layout.simple_spinner_item);
@@ -69,19 +69,6 @@ public class CloudSettingsActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String item = (String) parent.getItemAtPosition(position);
-                //Toast.makeText(CloudActivity.this, "Selected: " + item, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
 
     }
 
@@ -96,6 +83,7 @@ public class CloudSettingsActivity extends AppCompatActivity {
         String authtoken = ((EditText) findViewById(R.id.token_et)).getText().toString();
         String commandId = ((EditText) findViewById(R.id.command_id_et)).getText().toString();
         String eventId = ((EditText) findViewById(R.id.event_id_et)).getText().toString();
+        Spinner spinner = (Spinner) findViewById(R.id.connection_protocol_spinner);
 
         bundle.putString(KEY_TYPE, type);
         bundle.putString(KEY_NAME, name);
@@ -106,7 +94,7 @@ public class CloudSettingsActivity extends AppCompatActivity {
         bundle.putString(KEY_AUTH_TOKEN, authtoken);
         bundle.putString(KEY_COMMAND_ID, commandId);
         bundle.putString(KEY_EVENT_ID, eventId);
-
+        bundle.putString(KEY_CONNECTION_PROTOCOL, spinner.getSelectedItem().toString());
 
         if (editId != null) {
             bundle.putString(KEY_EDIT_IT, editId);
@@ -133,11 +121,12 @@ public class CloudSettingsActivity extends AppCompatActivity {
 
         if (type != null && !type.equals("BLUEMIX")) {
 
-            ((EditText) findViewById(R.id.app_id_et)).setVisibility(View.GONE);
-            ((EditText) findViewById(R.id.token_et)).setVisibility(View.GONE);
-            ((EditText) findViewById(R.id.key_et)).setVisibility(View.GONE);
-            ((EditText) findViewById(R.id.command_id_et)).setVisibility(View.GONE);
-            ((EditText) findViewById(R.id.event_id_et)).setVisibility(View.GONE);
+            findViewById(R.id.app_id_et).setVisibility(View.GONE);
+            findViewById(R.id.token_et).setVisibility(View.GONE);
+            findViewById(R.id.key_et).setVisibility(View.GONE);
+            findViewById(R.id.command_id_et).setVisibility(View.GONE);
+            findViewById(R.id.event_id_et).setVisibility(View.GONE);
+            findViewById(R.id.connection_type_spinner).setVisibility(View.GONE);
 
         } else {
             String appId = bundle.getString(KEY_APPLICATION_ID);
@@ -164,6 +153,15 @@ public class CloudSettingsActivity extends AppCompatActivity {
             if (eventId != null) {
                 ((EditText) findViewById(R.id.event_id_et)).setText(eventId);
             }
+
+            String connectionType = bundle.getString(KEY_CONNECTION_PROTOCOL);
+            if (connectionType != null) {
+                List<String> connectionTypeItems = Arrays.asList(getResources().getStringArray(R.array.connection_types));
+                int position = connectionTypeItems.indexOf(connectionType);
+                ((Spinner) findViewById(R.id.connection_protocol_spinner)).setSelection(position);
+
+            }
+
         }
 
     }

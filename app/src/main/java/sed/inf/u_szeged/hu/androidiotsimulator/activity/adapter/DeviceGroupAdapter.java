@@ -2,6 +2,7 @@ package sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter;
 
 import android.content.Context;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,23 +17,24 @@ import java.util.Objects;
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesActivity;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.device.Device;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.device.DeviceGroup;
 
 /**
  * Created by Tomi on 2016. 01. 21..
  */
-public class DeviceAdapter extends ArrayAdapter<Device> {
+public class DeviceGroupAdapter extends ArrayAdapter<DeviceGroup> {
 
-    public DeviceAdapter(Context context, int textViewResourceId) {
+    public DeviceGroupAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
     }
 
-    public DeviceAdapter(Context context, int resource, List<Device> items) {
+    public DeviceGroupAdapter(Context context, int resource, List<DeviceGroup> items) {
         super(context, resource, items);
     }
 
+    @NonNull
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, @NonNull ViewGroup parent) {
 
         View v = convertView;
 
@@ -42,25 +44,24 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
             v = vi.inflate(R.layout.device_item, null);
         }
 
-        final Device d = getItem(position);
+        final DeviceGroup deviceGroup = getItem(position);
 
-        if (d != null) {
-            //TextView typeIdTV = (TextView) v.findViewById(R.id.type_id);
+        if (deviceGroup != null) {
             TextView deviceIDTV = (TextView) v.findViewById(R.id.device_id);
-            final Button exportBtn = (Button) v.findViewById(R.id.export_btn);
+            TextView subdevicesTv = (TextView) v.findViewById(R.id.subdevices_tv);
             final Button startBtn = (Button) v.findViewById(R.id.start_btn);
             final Button editBtn = (Button) v.findViewById(R.id.edit_btn);
             final Button deleteBtn = (Button) v.findViewById(R.id.delete_btn);
-/*
-                if(typeIdTV != null){
-                    typeIdTV.setText( d.getTypeID() );
-                }
-*/
+
             if (deviceIDTV != null) {
-                deviceIDTV.setText(d.getDeviceID());
+                deviceIDTV.setText(deviceGroup.getBaseDevice().getDeviceID());
             }
 
-            if (d.isWarning()) {
+            if (subdevicesTv != null) {
+                subdevicesTv.setText(String.valueOf(deviceGroup.getBaseDevice().getNumOfDevices()));
+            }
+
+            if (deviceGroup.isWarning()) {
                 v.findViewById(R.id.warning).setVisibility(View.VISIBLE);
                 v.findViewById(R.id.warning).setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -73,9 +74,9 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
             }
 
 
-            if (Objects.equals(d.getType(), "Thermostat")) {
+            if (Objects.equals(deviceGroup.getBaseDevice().getType(), "Thermostat")) {
                 v.findViewById(R.id.swtich).setVisibility(View.VISIBLE);
-                if (d.isOn()) {
+                if (deviceGroup.getDevicesList().get(0).isOn()) {
                     ((ImageView) v.findViewById(R.id.swtich)).setImageResource(R.drawable.ic_on_circle);
                 } else {
                     ((ImageView) v.findViewById(R.id.swtich)).setImageResource(R.drawable.ic_off_circle);
@@ -86,27 +87,28 @@ public class DeviceAdapter extends ArrayAdapter<Device> {
 
 
             if (startBtn != null) {
-                boolean runs = d.isRunning();
+                boolean runs = deviceGroup.isRunning();
                 if (runs) {
-                    startBtn.setText("Stop");
+                    startBtn.setText(getContext().getResources().getText(R.string.stop_btn));
                     if (editBtn != null) {
                         editBtn.setEnabled(false);
                     }
                 } else {
-                    startBtn.setText("Start");
+                    startBtn.setText(getContext().getResources().getText(R.string.start_btn));
                     editBtn.setEnabled(true);
                 }
 
                 startBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (d.isRunning()) {
-                            d.stop(getContext());
-                            startBtn.setText("Start");
+                        if (deviceGroup.isRunning()) {
+                            deviceGroup.stopDevices(getContext());
+                            startBtn.setText(getContext().getResources().getText(R.string.start_btn));
+                            assert editBtn != null;
                             editBtn.setEnabled(true);
                         } else {
-                            new Thread(d).start();
-                            startBtn.setText("Stop");
+                            deviceGroup.startDevices();
+                            startBtn.setText(getContext().getResources().getText(R.string.stop_btn));
                             if (editBtn != null) {
                                 editBtn.setEnabled(false);
                             }

@@ -1,16 +1,23 @@
-package sed.inf.u_szeged.hu.androidiotsimulator.model.replay;
+package sed.inf.u_szeged.hu.androidiotsimulator.model.trace;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by tommy on 1/29/2017. Project name: MobIoTSim-mirrored
  *  
  */
 
-public class Value {
+public class Parameter {
 
+    @SerializedName("name")
+    @Expose
     private String name;
+    @SerializedName("value")
+    @Expose
     private String value;
 
-    public Value(String name, String value) {
+    public Parameter(String name, String value) {
         this.name = name;
         this.value = value;
     }

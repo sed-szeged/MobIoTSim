@@ -81,6 +81,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:hint="@string/token_hint"
                     android:text="" />
             </LinearLayout>
 
@@ -122,6 +123,28 @@
                     android:layout_height="35dp"
                     android:layout_weight="1"
                     android:text="" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/numofdevices_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="@string/numofdevices" />
+
+                <EditText
+                    android:id="@+id/numofdevices_et"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="number"
+                    android:text="1" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -176,22 +199,22 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/replay_container"
+                android:id="@+id/trace_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone">
 
                 <TextView
-                    android:id="@+id/replay_import_location"
+                    android:id="@+id/trace_import_location"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent" />
 
                 <Button
-                    android:id="@+id/replay_import_btn"
+                    android:id="@+id/trace_import_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/import_replay" />
+                    android:text="@string/import_trace" />
 
 
             </LinearLayout>
