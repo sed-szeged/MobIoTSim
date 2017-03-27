@@ -39,8 +39,8 @@ import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.ParameterAdapter
 import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorData;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.GsonDevice;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.Sensor;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.GsonDevice;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.Sensor;
 import sed.inf.u_szeged.hu.androidiotsimulator.views.ExpandedListView;
 
 public class DeviceSettingsActivity extends AppCompatActivity {

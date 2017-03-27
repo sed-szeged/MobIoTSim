@@ -1,4 +1,4 @@
-package sed.inf.u_szeged.hu.androidiotsimulator.model.gson;
+package sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

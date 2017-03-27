@@ -12,12 +12,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.openweather.OpenweatherTrace;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.FinishedTrace;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.TraceGroup;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.json.BulkDevice;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.trace.TraceGroup;
 
 /**
  * Created by tommy on 2/27/2017. Project name: MobIoTSim-mirrored
@@ -25,6 +28,7 @@ import sed.inf.u_szeged.hu.androidiotsimulator.model.trace.TraceGroup;
  */
 public class DeviceGroup {
 
+    private static final String GENERIC_DEVICE_TRACE = "generic_device_with_parameters";
     private ArrayList<Device> devicesList;
     private TraceGroup finishedTraceList;
     private Device baseDevice;
@@ -37,7 +41,24 @@ public class DeviceGroup {
         String deviceId = baseDevice.getDeviceID();
 
         for (int i = 0; i < numOfDevices; i++) {
-            Device newDevice = new Device(this.baseDevice, deviceId + "_" + (i + 1));
+            Device newDevice = new Device(this.baseDevice);
+            newDevice.setDeviceID(deviceId + "_" + (i + 1));
+
+            if (!Objects.equals(baseDevice.getTraceFileLocation(), "random")) {
+                if (isGenericTrace()) {
+                    String jsonStr = getJsonStr();
+                    newDevice.setTraceData(getTraceFromGroup(jsonStr, i));
+                    newDevice.setTraceCounter(0);
+                } else {
+                    String jsonStr = getJsonStr();
+                    newDevice.setOpenweatherTraceData(getOpenWeatherDatas(jsonStr));
+                    newDevice.setTraceData(null);
+                }
+            } else {
+                newDevice.setTraceData(null);
+            }
+
+
             devicesList.add(newDevice);
         }
 
@@ -61,7 +82,7 @@ public class DeviceGroup {
 
         if (baseDevice.getTraceFileLocation().equals("random")) {
             finishedTraceList.setCnt(finishedTraceList.getTraceGroup().get(0).getCycles().size());
-            finishedTraceList.setType(baseDevice.getType());
+            finishedTraceList.setType(GENERIC_DEVICE_TRACE);
             saveTraceToJson(ctx);
         }
     }
@@ -144,6 +165,57 @@ public class DeviceGroup {
         }
         return result;
     }
+
+
+    private boolean isGenericTrace() {
+        final String path = baseDevice.getTraceFileLocation();
+        boolean result = false;
+
+        try {
+            String jsonStr = MobIoTApplication.getStringFromFile(path);
+
+            if (jsonStr.contains(DeviceGroup.GENERIC_DEVICE_TRACE)) {
+                result = true;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    private String getJsonStr() {
+        final String path = baseDevice.getTraceFileLocation();
+        String jsonStr = "";
+        try {
+            jsonStr = MobIoTApplication.getStringFromFile(path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonStr;
+
+    }
+
+    private OpenweatherTrace getOpenWeatherDatas(String jsonStr) {
+        Gson gson = new Gson();
+        jsonStr.replace("\t", "");
+        OpenweatherTrace trace = gson.fromJson(jsonStr, OpenweatherTrace.class);
+        System.out.println(jsonStr);
+        return trace;
+    }
+
+
+    private FinishedTrace getTraceFromGroup(String jsonStr, int index) {
+        FinishedTrace obj = null;
+        Gson gson = new Gson();
+        TraceGroup traceGroup = gson.fromJson(jsonStr, TraceGroup.class);
+        int sizeOfTraceGroup = traceGroup.getTraceGroup().size();
+        obj = traceGroup.getTraceGroup().get((index) % sizeOfTraceGroup);
+
+        return obj;
+    }
+
 
     public ArrayList<Device> getDevicesList() {
         return devicesList;

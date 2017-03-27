@@ -32,7 +32,7 @@ import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActiv
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.Device;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.DeviceGroup;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.GsonDevice;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.GsonDevice;
 
 public class DevicesActivity extends AppCompatActivity {
 
@@ -282,10 +282,11 @@ public class DevicesActivity extends AppCompatActivity {
             System.out.println("empty devices");
             String organizationId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
             DeviceGroup d = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice01", "RFoDC-zKRO_BJ*d+x8",
-                    "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random",1));
+                    "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random", 1));
+            //System.out.println("MobIoT_test01 json: " + d.getBaseDevice().getSerial());
             deviceGroupList.add(d);
             DeviceGroup d2 = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice02", "8f3n4rE?rnA-rCF-vR",
-                    "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random",1));
+                    "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random", 1));
             deviceGroupList.add(d2);
 
             initDevicesList();

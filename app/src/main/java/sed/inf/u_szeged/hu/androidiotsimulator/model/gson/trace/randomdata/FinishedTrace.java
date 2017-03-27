@@ -1,4 +1,4 @@
-package sed.inf.u_szeged.hu.androidiotsimulator.model.trace;
+package sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
