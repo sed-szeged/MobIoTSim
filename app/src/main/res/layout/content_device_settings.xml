@@ -36,10 +36,10 @@
                     android:layout_weight="0"
                     android:text="@string/type_id" />
 
-                <EditText
-                    android:id="@+id/type_id_et"
+                <Spinner
+                    android:id="@+id/typeid_spinner"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="34dp"
                     android:layout_weight="1"
                     android:text="" />
             </LinearLayout>

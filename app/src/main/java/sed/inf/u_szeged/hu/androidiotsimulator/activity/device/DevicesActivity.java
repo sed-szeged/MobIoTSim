@@ -1,13 +1,14 @@
 package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,7 +160,7 @@ public class DevicesActivity extends AppCompatActivity {
             System.out.println("Uri = " + uri.toString());
             try {
                 // Get the file path from the URI
-                final String path = FileUtils.getPath(this, uri);
+                final String path = getRealPathFromURI(uri);
                 Toast.makeText(DevicesActivity.this,
                         "File Selected: " + path, Toast.LENGTH_LONG).show();
 
@@ -179,6 +179,14 @@ public class DevicesActivity extends AppCompatActivity {
                 System.out.println("DevicesActivity" + " File select error" + e);
             }
         }
+    }
+
+    public String getRealPathFromURI(Uri contentUri) {
+        String[] proj = {MediaStore.Audio.Media.DATA};
+        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
 
     private boolean editDeviceActivityResult(Intent data) {
@@ -337,6 +345,11 @@ public class DevicesActivity extends AppCompatActivity {
                                 break;
                             case "Thermostat":
                                 type = getString(R.string.type_thermostat);
+                                paramName = getString(R.string.param_temperature);
+                                min = res.getInteger(R.integer.temp_min);
+                                max = res.getInteger(R.integer.temp_max);
+                                freq = res.getInteger(R.integer.temp_frequency);
+                                break;
                             case "Temperature":
                                 type = getString(R.string.type_temperature);
                                 paramName = getString(R.string.param_temperature);
@@ -441,17 +454,10 @@ public class DevicesActivity extends AppCompatActivity {
     }
 
     private void showFileChooser() {
-        // Use the GET_CONTENT intent from the utility class
-        Intent target = FileUtils.createGetContentIntent();
-        // Create the chooser Intent
-        Intent intent = Intent.createChooser(
-                target, "choose file");
-        try {
-            startActivityForResult(intent, IMPORT_DEVICE_REQ_CODE);
-        } catch (ActivityNotFoundException e) {
-            // The reason for the existence of aFileChooser
-            System.out.println("Can't show the file chooser: " + e);
-        }
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, IMPORT_DEVICE_REQ_CODE);
     }
 
 }

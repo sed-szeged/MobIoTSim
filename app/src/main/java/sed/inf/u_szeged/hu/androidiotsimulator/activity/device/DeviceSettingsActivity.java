@@ -1,7 +1,7 @@
 package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -9,7 +9,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.DocumentsContract;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,11 +38,14 @@ import java.util.StringTokenizer;
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.ParameterAdapter;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorData;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.GsonDevice;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.Sensor;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.devicetype.Result;
 import sed.inf.u_szeged.hu.androidiotsimulator.views.ExpandedListView;
 
 public class DeviceSettingsActivity extends AppCompatActivity {
@@ -79,6 +84,8 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     String traceFileLocation;
     Switch aSwitch;
     Resources res;
+    ArrayList<String> deviceTypeIds;
+    RESTTools restTools;
 
     private static boolean isExternalStorageReadOnly() {
         String extStorageState = Environment.getExternalStorageState();
@@ -115,7 +122,8 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                     System.out.println("Uri = " + uri.toString());
                     try {
                         // Get the file path from the URI
-                        final String path = FileUtils.getPath(this, uri);
+
+                        final String path = getRealPathFromURI(uri);
                         Toast.makeText(DeviceSettingsActivity.this,
                                 "File imported: " + path, Toast.LENGTH_LONG).show();
                         traceFileLocation = path;
@@ -130,10 +138,23 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         }
     }
 
+
+    private String getRealPathFromURI(Uri contentURI) {
+        final String docId = DocumentsContract.getDocumentId(contentURI);
+        final String[] split = docId.split(":");
+        return Environment.getExternalStorageDirectory() + "/" + split[1];
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_settings);
+
+        String auth_key = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_KEY);
+        String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
+        String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
+
+        restTools = new RESTTools(orgId, auth_key, auth_token);
 
         MobIoTApplication.setActivity(this);
 
@@ -266,7 +287,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             GsonDevice gsonDevice = new GsonDevice();
             gsonDevice.setOrganizationId((String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem());
             gsonDevice.setDeviceId(((EditText) findViewById(R.id.device_id_et)).getText().toString());
-            gsonDevice.setTypeId(((EditText) findViewById(R.id.type_id_et)).getText().toString());
+            gsonDevice.setTypeId(String.valueOf(((Spinner) findViewById(R.id.typeid_spinner)).getSelectedItem()));
             gsonDevice.setToken(((EditText) findViewById(R.id.token_et)).getText().toString());
             gsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
             gsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
@@ -400,7 +421,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private Bundle getData() {
         Bundle bundle = new Bundle();
 
-        String type_id = ((EditText) findViewById(R.id.type_id_et)).getText().toString();
+        String type_id = String.valueOf(((Spinner) findViewById(R.id.typeid_spinner)).getSelectedItem());
         String device_id = ((EditText) findViewById(R.id.device_id_et)).getText().toString();
         String token = ((EditText) findViewById(R.id.token_et)).getText().toString();
         String organization_id = (String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem();
@@ -438,10 +459,19 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     }
 
     private void setData(Bundle bundle) {
-        String type_id = bundle.getString(KEY_TYPE_ID);
-        if (type_id != null && !type_id.trim().equals("")) {
-            ((EditText) findViewById(R.id.type_id_et)).setText(type_id);
+
+
+        List<Result> jsonTypeIds = restTools.getDeviceTypes();
+
+        deviceTypeIds = new ArrayList<>();
+        for (Result result : jsonTypeIds) {
+            deviceTypeIds.add(result.getId());
         }
+
+        String type_id = bundle.getString(KEY_TYPE_ID);
+
+        initTypeIdSpinner(type_id);
+
 
         String device_id = bundle.getString(KEY_DEVICE_ID);
         if (device_id != null && !device_id.trim().equals("")) {
@@ -497,19 +527,82 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 "\nfreq:" + freq);
     }
 
+    private void initTypeIdSpinner(String type_id) {
+        Spinner spinner = (Spinner) findViewById(R.id.typeid_spinner);
+        ArrayList<String> typeIds = deviceTypeIds;
+
+        if (typeIds.contains("Create new type...")) {
+            typeIds.remove("Create new type...");
+        }
+
+        typeIds.add("Create new type...");
+        final int positionOfLast = typeIds.size() - 1;
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, typeIds);
+        // Specify the layout to use when the list of choices appears
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(spinnerAdapter);
+        int selectedPos = deviceTypeIds.indexOf(type_id);
+        spinner.setSelection(selectedPos);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                if (position == positionOfLast) {
+                    System.out.println("New selected");
+                    showInputDialog();
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+
+
+    private void showInputDialog() {
+        LayoutInflater layoutInflater = LayoutInflater.from(DeviceSettingsActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.input_dialog, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DeviceSettingsActivity.this);
+        alertDialogBuilder.setView(promptView);
+
+        final EditText editText = (EditText) promptView.findViewById(R.id._dialog_input_et);
+        // setup a dialog window
+        alertDialogBuilder.setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String newType = String.valueOf(editText.getText());
+                        deviceTypeIds.add(newType);
+                        initTypeIdSpinner(newType);
+                        restTools.addDeviceType("{ \"id\" : \"" + newType + "\" }");
+
+                    }
+                })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create an alert dialog
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+    }
+
 
     private void showFileChooser() {
-        // Use the GET_CONTENT intent from the utility class
-        Intent target = FileUtils.createGetContentIntent();
-        // Create the chooser Intent
-        Intent intent = Intent.createChooser(
-                target, "choose file");
-        try {
-            startActivityForResult(intent, IMPORT_TRACE_LOCATION_REQ_CODE);
-        } catch (ActivityNotFoundException e) {
-            // The reason for the existence of aFileChooser
-            System.out.println("Can't show the file chooser: " + e);
-        }
+
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, IMPORT_TRACE_LOCATION_REQ_CODE);
     }
 
 
