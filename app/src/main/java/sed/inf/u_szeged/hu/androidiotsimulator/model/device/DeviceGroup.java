@@ -32,9 +32,11 @@ public class DeviceGroup {
     private ArrayList<Device> devicesList;
     private TraceGroup finishedTraceList;
     private Device baseDevice;
+    private Context context;
 
-    public DeviceGroup(Device baseDevice) {
+    public DeviceGroup(Device baseDevice, Context context) {
         this.baseDevice = new Device(baseDevice);
+        this.context = context;
         devicesList = new ArrayList<>();
 
         int numOfDevices = baseDevice.getNumOfDevices();
@@ -113,7 +115,7 @@ public class DeviceGroup {
         String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
         String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
 
-        RESTTools restTools = new RESTTools(orgId, auth_key, auth_token);
+        RESTTools restTools = new RESTTools(orgId, auth_key, auth_token, context);
         restTools.addDevices(finalJson);
     }
 
@@ -151,7 +153,7 @@ public class DeviceGroup {
         String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
         String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
 
-        RESTTools restTools = new RESTTools(orgId, auth_key, auth_token);
+        RESTTools restTools = new RESTTools(orgId, auth_key, auth_token, context);
         restTools.removeDevice(finalJson);
     }
 

@@ -1,10 +1,13 @@
 package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -12,6 +15,7 @@ import android.os.Message;
 import android.provider.DocumentsContract;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,6 +34,11 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -154,7 +163,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
         String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
 
-        restTools = new RESTTools(orgId, auth_key, auth_token);
+        restTools = new RESTTools(orgId, auth_key, auth_token, getApplicationContext());
 
         MobIoTApplication.setActivity(this);
 
@@ -458,19 +467,15 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         return bundle;
     }
 
+
+
+
+
     private void setData(Bundle bundle) {
-
-
-        List<Result> jsonTypeIds = restTools.getDeviceTypes();
-
-        deviceTypeIds = new ArrayList<>();
-        for (Result result : jsonTypeIds) {
-            deviceTypeIds.add(result.getId());
-        }
 
         String type_id = bundle.getString(KEY_TYPE_ID);
 
-        initTypeIdSpinner(type_id);
+        new TypeSpinnerFillingTask(type_id).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
         String device_id = bundle.getString(KEY_DEVICE_ID);
@@ -603,6 +608,35 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
         startActivityForResult(intent, IMPORT_TRACE_LOCATION_REQ_CODE);
+    }
+
+
+    private class TypeSpinnerFillingTask extends AsyncTask<String, String, Void> {
+
+
+        String defaultTypeid;
+        List<Result> jsonTypeIds;
+
+        TypeSpinnerFillingTask(String defaultTypeId) {
+            this.defaultTypeid=defaultTypeId;
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+
+            jsonTypeIds = restTools.getDeviceTypes();
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            deviceTypeIds = new ArrayList<>();
+            for (Result result : jsonTypeIds) {
+                deviceTypeIds.add(result.getId());
+            }
+            initTypeIdSpinner(defaultTypeid);
+        }
     }
 
 

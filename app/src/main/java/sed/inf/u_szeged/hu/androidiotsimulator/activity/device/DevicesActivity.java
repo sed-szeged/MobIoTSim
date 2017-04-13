@@ -170,7 +170,7 @@ public class DevicesActivity extends AppCompatActivity {
                 GsonDevice obj = gson.fromJson(jsonStr, GsonDevice.class);
 
                 Device importedBaseDevice = Device.fromJson(obj);
-                DeviceGroup deviceGroup = new DeviceGroup(importedBaseDevice);
+                DeviceGroup deviceGroup = new DeviceGroup(importedBaseDevice,getApplicationContext());
                 deviceGroupList.add(deviceGroup);
                 deviceGroupAdapter.notifyDataSetChanged();
 
@@ -203,7 +203,7 @@ public class DevicesActivity extends AppCompatActivity {
 
             deviceGroupList.get(position).removeFromCloud();
 
-            DeviceGroup group = new DeviceGroup(device);
+            DeviceGroup group = new DeviceGroup(device, getApplicationContext());
 
             System.out.println("Edit deviceGroupList from " + position + " : " + deviceGroupAdapter.getItem(position));
             System.out.println("Edit deviceGroupList to: " + device);
@@ -225,7 +225,7 @@ public class DevicesActivity extends AppCompatActivity {
             System.out.println("onActivityResult add bundle " + bundle.toString());
 
             Device device = getDeviceFromBundle(bundle);
-            DeviceGroup group = new DeviceGroup(device);
+            DeviceGroup group = new DeviceGroup(device, getApplicationContext());
 
             System.out.println("Add deviceGroupList: " + device.toString());
             deviceGroupAdapter.add(group);
@@ -274,7 +274,7 @@ public class DevicesActivity extends AppCompatActivity {
             StringTokenizer st = new StringTokenizer(devicesStr, "<");
             while (st.hasMoreTokens()) {
                 String deviceSerial = st.nextToken();
-                DeviceGroup group = new DeviceGroup(Device.fromSerial(deviceSerial));
+                DeviceGroup group = new DeviceGroup(Device.fromSerial(deviceSerial), getApplicationContext());
                 deviceGroupList.add(group);
             }
 
@@ -290,11 +290,10 @@ public class DevicesActivity extends AppCompatActivity {
             System.out.println("empty devices");
             String organizationId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
             DeviceGroup d = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice01", "RFoDC-zKRO_BJ*d+x8",
-                    "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random", 1));
-            //System.out.println("MobIoT_test01 json: " + d.getBaseDevice().getSerial());
+                    "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random",1),getApplicationContext());
             deviceGroupList.add(d);
             DeviceGroup d2 = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice02", "8f3n4rE?rnA-rCF-vR",
-                    "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random", 1));
+                    "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random",1),getApplicationContext());
             deviceGroupList.add(d2);
 
             initDevicesList();
