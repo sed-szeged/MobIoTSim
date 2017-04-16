@@ -70,6 +70,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     public static final String KEY_SENSORS = "SENSORS";
     public static final String KEY_TRACE_LOCATION = "TRACELOCATION";
     public static final String KEY_NUM_OF_DEVICES = "NUM_OF_DEVICES";
+    public static final String KEY_SAVE_TRACE = "SAVE TRACE";
     public static final int MSG_W_DELETE_PARAMETER = 39;
     private static final int IMPORT_TRACE_LOCATION_REQ_CODE = 6544;
     private static ParameterAdapter adapter;
@@ -179,11 +180,14 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 if (on) {
                     //Do something when Switch button is on/checked
                     traceFileLocation = "random";
+                    ((Switch) findViewById(R.id.sw_save_trace)).setChecked(true);
+
                     findViewById(R.id.parameter_container).setVisibility(View.VISIBLE);
                     findViewById(R.id.trace_container).setVisibility(View.GONE);
 
                 } else {
                     //Do something when Switch is off/unchecked
+                    ((Switch) findViewById(R.id.sw_save_trace)).setChecked(false);
                     findViewById(R.id.parameter_container).setVisibility(View.GONE);
                     findViewById(R.id.trace_container).setVisibility(View.VISIBLE);
 
@@ -301,6 +305,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             gsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
             gsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
             gsonDevice.setNumOfDevices(Integer.parseInt(((EditText) findViewById(R.id.numofdevices_et)).getText().toString()));
+            gsonDevice.setSaveTrace(((Switch)findViewById(R.id.sw_save_trace)).isChecked());
 
             List<Sensor> list = new ArrayList<>();
             SensorDataWrapper sensorDataWrapper = new SensorDataWrapper(adapter.getResult());
@@ -437,6 +442,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         String type = (String) ((Spinner) findViewById(R.id.type_spinner)).getSelectedItem();
         String freq = ((EditText) findViewById(R.id.freq_value_et)).getText().toString();
         String num = ((EditText) findViewById(R.id.numofdevices_et)).getText().toString();
+        String saveTrace = String.valueOf(((Switch) findViewById(R.id.sw_save_trace)).isChecked());
         SensorDataWrapper paramResults = new SensorDataWrapper(adapter.getResult());
 
         System.out.println("getData " +
@@ -459,6 +465,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         bundle.putString(KEY_FREQ, freq);
         bundle.putString(KEY_SENSORS, paramResults.toString());
         bundle.putString(KEY_TRACE_LOCATION, traceFileLocation);
+        bundle.putString(KEY_SAVE_TRACE, saveTrace);
 
         if (editId != null) {
             bundle.putString(KEY_EDIT_IT, editId);
@@ -514,6 +521,10 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.numofdevices_et)).setText(numOfDevices);
         }
 
+        String saveTrace = bundle.getString(KEY_SAVE_TRACE);
+        if (saveTrace != null && !saveTrace.trim().equals("")) {
+            ((Switch) findViewById(R.id.sw_save_trace)).setChecked(Boolean.parseBoolean(saveTrace));
+        }
 
         if (!Objects.equals(bundle.getString(KEY_TRACE_LOCATION), "random")) {
             aSwitch.setChecked(false);

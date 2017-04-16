@@ -35,6 +35,9 @@ public class GsonDevice {
     @SerializedName("numOfDevices")
     @Expose
     private int numOfDevices;
+    @SerializedName("saveTrace")
+    @Expose
+    private boolean saveTrace;
 
     /**
      * @return The organizationId
@@ -160,5 +163,13 @@ public class GsonDevice {
      */
     public void setNumOfDevices(int numOfDevices) {
         this.numOfDevices = numOfDevices;
+    }
+
+    public boolean isSaveTrace() {
+        return saveTrace;
+    }
+
+    public void setSaveTrace(boolean saveTrace) {
+        this.saveTrace = saveTrace;
     }
 }

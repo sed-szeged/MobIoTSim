@@ -86,6 +86,7 @@
     <string name="type_humidity">Humidity</string>
     <string name="param_temperature">temp</string>
     <string name="param_humidity">humidity</string>
+    <string name="save_trace">Save trace</string>
 
 
 </resources>

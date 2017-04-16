@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -75,14 +74,16 @@ public class DeviceGroupAdapter extends ArrayAdapter<DeviceGroup> {
 
 
             if (Objects.equals(deviceGroup.getBaseDevice().getType(), "Thermostat")) {
-                v.findViewById(R.id.swtich).setVisibility(View.VISIBLE);
-                if (deviceGroup.getDevicesList().get(0).isOn()) {
-                    ((ImageView) v.findViewById(R.id.swtich)).setImageResource(R.drawable.ic_on_circle);
-                } else {
-                    ((ImageView) v.findViewById(R.id.swtich)).setImageResource(R.drawable.ic_off_circle);
-                }
+                v.findViewById(R.id.on_off_container).setVisibility(View.VISIBLE);
+
+                int numOn = deviceGroup.getNumOfOnDevices();
+                ((TextView) v.findViewById(R.id.on_devices_tv)).setText("ON: " + numOn);
+
+                int numOff = deviceGroup.getDevicesList().size() - numOn;
+                ((TextView) v.findViewById(R.id.off_devices_tv)).setText("OFF: " + numOff);
+
             } else {
-                v.findViewById(R.id.swtich).setVisibility(View.GONE);
+                v.findViewById(R.id.on_off_container).setVisibility(View.GONE);
             }
 
 

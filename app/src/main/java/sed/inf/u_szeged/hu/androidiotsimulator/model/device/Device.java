@@ -62,6 +62,7 @@ public class Device implements Runnable, MqttCallback {
     private boolean isOn = false;
     private int cnt;
     private int traceCounter;
+    private boolean saveTrace;
     private FinishedTrace clog;
 
     private FinishedTrace traceData;
@@ -89,9 +90,10 @@ public class Device implements Runnable, MqttCallback {
         this.traceCounter = copyDevice.getTraceCounter();
         this.clog = copyDevice.getClog();
         this.traceData = copyDevice.getTraceData();
+        this.saveTrace=copyDevice.isSaveTrace();
     }
 
-    public Device(String organizationID, String typeID, String deviceID, String token, String type, double freq, SensorDataWrapper sensors, String traceFileLocation, int numOfDevices) {
+    public Device(String organizationID, String typeID, String deviceID, String token, String type, double freq, SensorDataWrapper sensors, String traceFileLocation, int numOfDevices, boolean saveTrace) {
         this.organizationID = organizationID;
         this.token = token;
         this.typeID = typeID;
@@ -102,7 +104,7 @@ public class Device implements Runnable, MqttCallback {
         this.sensors = sensors;
         this.traceFileLocation = traceFileLocation;
         this.numOfDevices = numOfDevices;
-
+        this.saveTrace = saveTrace;
         this.random = new Random();
 
         for (int j = 0; j < sensors.getList().size(); j++) {
@@ -124,8 +126,9 @@ public class Device implements Runnable, MqttCallback {
         SensorDataWrapper sensorDataWrapper = SensorDataWrapper.sensorDataFromSerial(st.nextToken());
         String traceFileLocation = st.nextToken();
         int numOfDevices = Integer.parseInt(st.nextToken());
+        boolean saveTrace = Boolean.parseBoolean(st.nextToken());
 
-        Device d = new Device(organizationID, typeID, deviceID, token, type, freq, sensorDataWrapper, traceFileLocation, numOfDevices);
+        Device d = new Device(organizationID, typeID, deviceID, token, type, freq, sensorDataWrapper, traceFileLocation, numOfDevices, saveTrace);
         return d;
     }
 
@@ -138,6 +141,7 @@ public class Device implements Runnable, MqttCallback {
         String type = gsonDevice.getType();
         double freq = Double.parseDouble(String.valueOf(gsonDevice.getFreq()));
         int numOfDevices = gsonDevice.getNumOfDevices();
+        boolean saveTrace = gsonDevice.isSaveTrace();
 
         SensorDataWrapper sensorDataWrapper = new SensorDataWrapper();
         for (Sensor s : gsonDevice.getSensors()) {
@@ -147,7 +151,7 @@ public class Device implements Runnable, MqttCallback {
 
         String traceFileLocation = gsonDevice.getTraceFileLocation();
 
-        Device d = new Device(organizationID, typeID, deviceID, token, type, freq, sensorDataWrapper, traceFileLocation, numOfDevices);
+        Device d = new Device(organizationID, typeID, deviceID, token, type, freq, sensorDataWrapper, traceFileLocation, numOfDevices, saveTrace);
         return d;
 
     }
@@ -392,6 +396,7 @@ public class Device implements Runnable, MqttCallback {
                         bundle.putString(DeviceSettingsActivity.KEY_FREQ, String.valueOf(freq));
                         bundle.putString(DeviceSettingsActivity.KEY_SENSORS, sensors.toString());
                         bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, traceFileLocation);
+                        bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(saveTrace));
                         msg.setData(bundle);
                         msg.setTarget(((DevicesActivity) MobIoTApplication.getActivity()).handler);
                         msg.sendToTarget();
@@ -526,6 +531,7 @@ public class Device implements Runnable, MqttCallback {
                         bundle.putString(DeviceSettingsActivity.KEY_FREQ, String.valueOf(freq));
                         bundle.putString(DeviceSettingsActivity.KEY_SENSORS, sensors.toString());
                         bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, traceFileLocation);
+                        bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(saveTrace));
                         msg.setData(bundle);
                         msg.setTarget(((DevicesActivity) MobIoTApplication.getActivity()).handler);
                         msg.sendToTarget();
@@ -593,6 +599,10 @@ public class Device implements Runnable, MqttCallback {
                 return false;
             }
 
+            if (other.isSaveTrace() != saveTrace) {
+                return false;
+            }
+
             return true;
         } else {
             return false;
@@ -618,6 +628,8 @@ public class Device implements Runnable, MqttCallback {
         sb.append(traceFileLocation);
         sb.append("|");
         sb.append(numOfDevices);
+        sb.append("|");
+        sb.append(saveTrace);
         return sb.toString();
     }
 
@@ -692,6 +704,14 @@ public class Device implements Runnable, MqttCallback {
 
     public void setNumOfDevices(int numOfDevices) {
         this.numOfDevices = numOfDevices;
+    }
+
+    public boolean isSaveTrace() {
+        return saveTrace;
+    }
+
+    public void setSaveTrace(boolean saveTrace) {
+        this.saveTrace = saveTrace;
     }
 
     @Override

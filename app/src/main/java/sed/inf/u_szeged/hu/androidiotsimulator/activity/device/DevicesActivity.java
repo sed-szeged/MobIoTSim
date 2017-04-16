@@ -3,12 +3,12 @@ package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
+import android.provider.DocumentsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -123,6 +123,7 @@ public class DevicesActivity extends AppCompatActivity {
         bundle.putString(DeviceSettingsActivity.KEY_EDIT_IT, String.valueOf(i));
         bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, deviceGroupAdapter.getItem(i).getBaseDevice().getTraceFileLocation());
         bundle.putString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES, String.valueOf(deviceGroupAdapter.getItem(i).getBaseDevice().getNumOfDevices()));
+        bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(deviceGroupAdapter.getItem(i).getBaseDevice().isSaveTrace()));
 
         intent.putExtras(bundle);
         startActivityForResult(intent, EDIT_DEVICE_SETTINGS_REQ_CODE);
@@ -160,9 +161,10 @@ public class DevicesActivity extends AppCompatActivity {
             System.out.println("Uri = " + uri.toString());
             try {
                 // Get the file path from the URI
+
                 final String path = getRealPathFromURI(uri);
                 Toast.makeText(DevicesActivity.this,
-                        "File Selected: " + path, Toast.LENGTH_LONG).show();
+                        "Device imported: " + path, Toast.LENGTH_LONG).show();
 
                 System.out.println(MobIoTApplication.getStringFromFile(path));
 
@@ -170,23 +172,21 @@ public class DevicesActivity extends AppCompatActivity {
                 GsonDevice obj = gson.fromJson(jsonStr, GsonDevice.class);
 
                 Device importedBaseDevice = Device.fromJson(obj);
-                DeviceGroup deviceGroup = new DeviceGroup(importedBaseDevice,getApplicationContext());
+                DeviceGroup deviceGroup = new DeviceGroup(importedBaseDevice, getApplicationContext());
                 deviceGroupList.add(deviceGroup);
                 deviceGroupAdapter.notifyDataSetChanged();
 
-                saveDevicesToPrefs();
             } catch (Exception e) {
-                System.out.println("DevicesActivity" + " File select error" + e);
+                System.out.println("DeviceSettingsActivity" + " File select error" + e);
             }
         }
+
     }
 
-    public String getRealPathFromURI(Uri contentUri) {
-        String[] proj = {MediaStore.Audio.Media.DATA};
-        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
+    private String getRealPathFromURI(Uri contentURI) {
+        final String docId = DocumentsContract.getDocumentId(contentURI);
+        final String[] split = docId.split(":");
+        return Environment.getExternalStorageDirectory() + "/" + split[1];
     }
 
     private boolean editDeviceActivityResult(Intent data) {
@@ -248,7 +248,8 @@ public class DevicesActivity extends AppCompatActivity {
                 Double.parseDouble(bundle.getString(DeviceSettingsActivity.KEY_FREQ)),
                 SensorDataWrapper.sensorDataFromSerial(bundle.getString(DeviceSettingsActivity.KEY_SENSORS)),
                 bundle.getString(DeviceSettingsActivity.KEY_TRACE_LOCATION),
-                Integer.parseInt(bundle.getString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES)));
+                Integer.parseInt(bundle.getString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES)),
+                Boolean.parseBoolean(bundle.getString(DeviceSettingsActivity.KEY_SAVE_TRACE)));
     }
 
     @Override
@@ -290,10 +291,10 @@ public class DevicesActivity extends AppCompatActivity {
             System.out.println("empty devices");
             String organizationId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
             DeviceGroup d = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice01", "RFoDC-zKRO_BJ*d+x8",
-                    "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random",1),getApplicationContext());
+                    "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random", 1, true), getApplicationContext());
             deviceGroupList.add(d);
             DeviceGroup d2 = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice02", "8f3n4rE?rnA-rCF-vR",
-                    "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random",1),getApplicationContext());
+                    "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random", 1, true), getApplicationContext());
             deviceGroupList.add(d2);
 
             initDevicesList();
@@ -372,6 +373,7 @@ public class DevicesActivity extends AppCompatActivity {
                         bundle.putString(DeviceSettingsActivity.KEY_SENSORS, paramName + "+" + min + "+" + max);
                         bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, "random");
                         bundle.putString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES, "1");
+                        bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(true));
                         intent.putExtras(bundle);
 
                         startActivityForResult(intent, ADD_DEVICE_SETTINGS_REQ_CODE);

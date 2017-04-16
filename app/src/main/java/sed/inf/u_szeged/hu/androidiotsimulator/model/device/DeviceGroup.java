@@ -82,7 +82,7 @@ public class DeviceGroup {
             finishedTraceList.add(d.getClog());
         }
 
-        if (baseDevice.getTraceFileLocation().equals("random")) {
+        if (baseDevice.getTraceFileLocation().equals("random") && baseDevice.isSaveTrace()) {
             finishedTraceList.setCnt(finishedTraceList.getTraceGroup().get(0).getCycles().size());
             finishedTraceList.setType(GENERIC_DEVICE_TRACE);
             saveTraceToJson(ctx);
@@ -218,6 +218,15 @@ public class DeviceGroup {
         return obj;
     }
 
+    public int getNumOfOnDevices(){
+        int result = 0;
+        for (Device device : devicesList) {
+            if (device.isOn()) {
+                result++;
+            }
+        }
+        return result;
+    }
 
     public ArrayList<Device> getDevicesList() {
         return devicesList;
