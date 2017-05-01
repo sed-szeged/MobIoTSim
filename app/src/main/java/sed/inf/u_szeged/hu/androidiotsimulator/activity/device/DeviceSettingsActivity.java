@@ -1,8 +1,6 @@
 package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -15,8 +13,10 @@ import android.os.Message;
 import android.provider.DocumentsContract;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -34,11 +34,6 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -160,6 +155,19 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_settings);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         String auth_key = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_KEY);
         String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
         String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
@@ -220,25 +228,25 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         getApplicationContext().setTheme(R.style.AppTheme);
 
 
-        ((Button) findViewById(R.id.ok_btn)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtras(getData());
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        });
+//        ((Button) findViewById(R.id.ok_btn)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent();
+//                intent.putExtras(getData());
+//                setResult(Activity.RESULT_OK, intent);
+//                finish();
+//            }
+//        });
 
-        ((Button) findViewById(R.id.cancel_btn)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtra("result", getData());
-                setResult(Activity.RESULT_CANCELED, intent);
-                finish();
-            }
-        });
+//        ((Button) findViewById(R.id.cancel_btn)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent();
+//                intent.putExtra("result", getData());
+//                setResult(Activity.RESULT_CANCELED, intent);
+//                finish();
+//            }
+//        });
 
 
         ((Button) findViewById(R.id.add_btn)).setOnClickListener(new View.OnClickListener() {
@@ -252,14 +260,14 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         });
 
 
-        ((Button) findViewById(R.id.save_btn)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveDeviceToJson();
-
-
-            }
-        });
+//        ((Button) findViewById(R.id.export_btn)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                        saveDeviceToJson();
+//
+//
+//            }
+//        });
 
         ((Button) findViewById(R.id.trace_import_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -269,9 +277,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         });
 
 
-        if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
-            ((Button) findViewById(R.id.save_btn)).setEnabled(false);
-        }
+//        if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
+//            ((Button) findViewById(R.id.export_btn)).setEnabled(false);
+//        }
 
 
         listView.setOnTouchListener(new View.OnTouchListener()
@@ -305,7 +313,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             gsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
             gsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
             gsonDevice.setNumOfDevices(Integer.parseInt(((EditText) findViewById(R.id.numofdevices_et)).getText().toString()));
-            gsonDevice.setSaveTrace(((Switch)findViewById(R.id.sw_save_trace)).isChecked());
+            gsonDevice.setSaveTrace(((Switch) findViewById(R.id.sw_save_trace)).isChecked());
 
             List<Sensor> list = new ArrayList<>();
             SensorDataWrapper sensorDataWrapper = new SensorDataWrapper(adapter.getResult());
@@ -475,9 +483,6 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     }
 
 
-
-
-
     private void setData(Bundle bundle) {
 
         String type_id = bundle.getString(KEY_TYPE_ID);
@@ -629,7 +634,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         List<Result> jsonTypeIds;
 
         TypeSpinnerFillingTask(String defaultTypeId) {
-            this.defaultTypeid=defaultTypeId;
+            this.defaultTypeid = defaultTypeId;
         }
 
         @Override
@@ -651,4 +656,63 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     }
 
 
+    private boolean areFieldsFilled() {
+        boolean result = true;
+        if (((EditText) findViewById(R.id.device_id_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.device_id_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.token_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.token_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.numofdevices_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.numofdevices_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.freq_value_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.freq_value_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+        return result;
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_device_settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_save) {
+            if (areFieldsFilled()) {
+                Intent intent = new Intent();
+                intent.putExtras(getData());
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
+        }
+
+        if (id == R.id.action_export) {
+            saveDeviceToJson();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        finish();
+        return true;
+    }
 }
+
+

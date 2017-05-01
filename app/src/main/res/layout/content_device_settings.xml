@@ -4,10 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".activity.device.DeviceSettingsActivity"
     tools:showIn="@layout/activity_device_settings">
@@ -17,18 +13,33 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <LinearLayout
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:orientation="vertical">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/specifications"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:layout_marginBottom="16dp"
+                android:textStyle="bold" />
+
             <LinearLayout
                 android:id="@+id/type_id_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
+
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -39,7 +50,7 @@
                 <Spinner
                     android:id="@+id/typeid_spinner"
                     android:layout_width="0dp"
-                    android:layout_height="34dp"
+                    android:layout_height="42dp"
                     android:layout_weight="1"
                     android:text="" />
             </LinearLayout>
@@ -100,7 +111,7 @@
                 <Spinner
                     android:id="@+id/orgid_spinner"
                     android:layout_width="0dp"
-                    android:layout_height="34dp"
+                    android:layout_height="42dp"
                     android:layout_weight="1"
                     android:text="" />
             </LinearLayout>
@@ -120,7 +131,7 @@
                 <Spinner
                     android:id="@+id/type_spinner"
                     android:layout_width="0dp"
-                    android:layout_height="35dp"
+                    android:layout_height="42dp"
                     android:layout_weight="1"
                     android:text="" />
             </LinearLayout>
@@ -172,13 +183,13 @@
             <Switch
                 android:id="@+id/sw_random"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="42dp"
                 android:checked="true"
                 android:text="@string/generate_random_data" />
 
             <LinearLayout
                 android:id="@+id/parameter_container"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="0dp">
@@ -186,9 +197,18 @@
                 <Switch
                     android:id="@+id/sw_save_trace"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="42dp"
                     android:checked="true"
                     android:text="@string/save_trace" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/set_parameters"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/add_btn"
@@ -198,7 +218,7 @@
 
                 <sed.inf.u_szeged.hu.androidiotsimulator.views.ExpandedListView
                     android:id="@+id/list"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="0px"
                     android:scrollbars="none" />
@@ -230,24 +250,6 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="30dp" />
-
-            <Button
-                android:id="@+id/ok_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ok_btn" />
-
-            <Button
-                android:id="@+id/cancel_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/cancel_btn" />
-
-            <Button
-                android:id="@+id/save_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/save_btn" />
 
 
         </LinearLayout>

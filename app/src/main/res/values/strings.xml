@@ -27,7 +27,7 @@
         <item>Thermostat</item>
     </string-array>
 
-    <string name="title_activity_devices">Devices</string>
+    <string name="title_activity_devices">  Devices</string>
     <string name="title_activity_device_settings">Edit Device</string>
     <string name="title_activity_information">Information</string>
     <string name="information">Information</string>
@@ -62,8 +62,8 @@
     <string name="type_id">Type ID:</string>
     <string name="token">Token:</string>
     <string name="frequency">Frequency:</string>
-    <string name="add_btn">Add</string>
-    <string name="save_btn">Save</string>
+    <string name="add_btn">Add parameter</string>
+    <string name="export_btn">Export</string>
     <string name="cloud_settings_btn">Cloud settings</string>
     <string name="devices_btn">Devices</string>
     <string name="information_btn">Information</string>
@@ -87,6 +87,14 @@
     <string name="param_temperature">temp</string>
     <string name="param_humidity">humidity</string>
     <string name="save_trace">Save trace</string>
+    <string name="internet_error">No internet connection!</string>
+    <string name="error">Error</string>
+    <string name="github_description">Read more about this project on GitHub</string>
+    <string name="select_cloud">Select cloud</string>
+    <string name="cloud_parameters">View parameters</string>
+    <string name="specifications">Device specifications</string>
+    <string name="set_parameters">Set parameters</string>
+    <string name="empty_field">Field is empty!</string>
 
 
 </resources>

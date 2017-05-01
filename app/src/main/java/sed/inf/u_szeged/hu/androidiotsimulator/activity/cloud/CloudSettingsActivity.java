@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -29,13 +32,26 @@ public class CloudSettingsActivity extends AppCompatActivity {
     public static final String KEY_EDIT_IT = "EDIT_IT";
     public static final String KEY_CONNECTION_PROTOCOL = "CONNECTION_PROTOCOL";
 
-
     String editId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cloud_settings);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         init();
     }
 
@@ -44,22 +60,22 @@ public class CloudSettingsActivity extends AppCompatActivity {
         editId = bundle.getString(KEY_EDIT_IT);
         setData(bundle);
 
-        findViewById(R.id.ok_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtras(getData());
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        });
-
-        findViewById(R.id.cancel_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+//        findViewById(R.id.ok_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent();
+//                intent.putExtras(getData());
+//                setResult(Activity.RESULT_OK, intent);
+//                finish();
+//            }
+//        });
+//
+//        findViewById(R.id.cancel_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                finish();
+//            }
+//        });
 
         Spinner spinner = (Spinner) findViewById(R.id.connection_protocol_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -166,4 +182,72 @@ public class CloudSettingsActivity extends AppCompatActivity {
 
     }
 
+    private boolean areFieldsFilled() {
+        boolean result = true;
+        if (((EditText) findViewById(R.id.name_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.name_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.organization_id_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.organization_id_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.app_id_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.app_id_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.key_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.key_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.token_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.token_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.command_id_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.command_id_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.event_id_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.event_id_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        return result;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_cloud_settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_save) {
+            if (areFieldsFilled()) {
+                Intent intent = new Intent();
+                intent.putExtras(getData());
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        finish();
+        return true;
+    }
 }

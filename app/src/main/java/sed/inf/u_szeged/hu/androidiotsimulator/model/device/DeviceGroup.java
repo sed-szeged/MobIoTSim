@@ -44,7 +44,7 @@ public class DeviceGroup {
 
         for (int i = 0; i < numOfDevices; i++) {
             Device newDevice = new Device(this.baseDevice);
-            newDevice.setDeviceID(deviceId + "_" + (i + 1));
+            newDevice.setDeviceID(deviceId + "_" + generateIdNumber(i));
 
             if (!Objects.equals(baseDevice.getTraceFileLocation(), "random")) {
                 if (isGenericTrace()) {
@@ -65,6 +65,17 @@ public class DeviceGroup {
         }
 
         saveToCloud();
+    }
+
+
+    private String generateIdNumber(int i) {
+        if (i<9) {
+            return "00"+(i+1);
+        }
+        if (i<99) {
+            return "0"+(i+1);
+        }
+        return String.valueOf((i+1));
     }
 
     public void startDevices() {

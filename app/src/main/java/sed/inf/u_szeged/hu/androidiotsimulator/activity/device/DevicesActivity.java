@@ -3,13 +3,16 @@ package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -17,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -28,7 +32,9 @@ import java.util.StringTokenizer;
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.DeviceGroupAdapter;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.Device;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.DeviceGroup;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
@@ -161,7 +167,6 @@ public class DevicesActivity extends AppCompatActivity {
             System.out.println("Uri = " + uri.toString());
             try {
                 // Get the file path from the URI
-
                 final String path = getRealPathFromURI(uri);
                 Toast.makeText(DevicesActivity.this,
                         "Device imported: " + path, Toast.LENGTH_LONG).show();
@@ -304,82 +309,28 @@ public class DevicesActivity extends AppCompatActivity {
     }
 
     private void initButtons() {
-        findViewById(R.id.add_new_device_btn).setOnClickListener(new View.OnClickListener() {
+
+        ((FloatingActionButton) findViewById(R.id.new_device_fab)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(DevicesActivity.this);
-                builder.setTitle("Select a Device Type");
-
-                ArrayAdapter<String> adp = new ArrayAdapter<>(DevicesActivity.this,
-                        android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.device_types));
-
-                final Spinner sp = new Spinner(DevicesActivity.this);
-                sp.setAdapter(adp);
-                builder.setView(sp);
-                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-
+                builder.setTitle("Select source");
+                final String cloudTypes[] = {"Create new device", "Import device template"};
+                builder.setItems(cloudTypes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
-                        Intent intent = new Intent(DevicesActivity.this, DeviceSettingsActivity.class);
-
-                        Bundle bundle = new Bundle();
-                        bundle.putString(DeviceSettingsActivity.KEY_ORGANIZATION_ID, MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID));
-
-                        //TODO from resources
-                        String type = "Custom";
-                        double freq = 1;
-                        String paramName = "";
-                        int min = 0;
-                        int max = 0;
-                        Resources res = getResources();
-
-                        switch (String.valueOf(sp.getSelectedItem())) {
-                            case "Custom":
-                                type = getString(R.string.type_custom);
-                                paramName = getString(R.string.param_custom);
-                                min = res.getInteger(R.integer.custom_min);
-                                max = res.getInteger(R.integer.custom_max);
-                                freq = res.getInteger(R.integer.custom_frequency);
+                        switch (which) {
+                            case 0:
+                                createNewDeviceAction();
                                 break;
-                            case "Thermostat":
-                                type = getString(R.string.type_thermostat);
-                                paramName = getString(R.string.param_temperature);
-                                min = res.getInteger(R.integer.temp_min);
-                                max = res.getInteger(R.integer.temp_max);
-                                freq = res.getInteger(R.integer.temp_frequency);
+                            case 1:
+                                showFileChooser();
                                 break;
-                            case "Temperature":
-                                type = getString(R.string.type_temperature);
-                                paramName = getString(R.string.param_temperature);
-                                min = res.getInteger(R.integer.temp_min);
-                                max = res.getInteger(R.integer.temp_max);
-                                freq = res.getInteger(R.integer.temp_frequency);
-                                break;
-                            case "Humidity":
-                                type = getString(R.string.type_humidity);
-                                freq = res.getInteger(R.integer.humidity_frequency);
-                                paramName = getString(R.string.param_humidity);
-                                min = res.getInteger(R.integer.humidity_min);
-                                max = res.getInteger(R.integer.humidity_max);
-                                break;
-
                         }
 
-
-                        bundle.putString(DeviceSettingsActivity.KEY_TYPE, type);
-                        bundle.putString(DeviceSettingsActivity.KEY_FREQ, Double.toString(freq));
-                        bundle.putString(DeviceSettingsActivity.KEY_SENSORS, paramName + "+" + min + "+" + max);
-                        bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, "random");
-                        bundle.putString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES, "1");
-                        bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(true));
-                        intent.putExtras(bundle);
-
-                        startActivityForResult(intent, ADD_DEVICE_SETTINGS_REQ_CODE);
                     }
                 });
-
 
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -389,18 +340,12 @@ public class DevicesActivity extends AppCompatActivity {
                 });
                 AlertDialog alertDialog = builder.create();
                 alertDialog.show();
-
             }
         });
 
-        ((Button) findViewById(R.id.import_device_btn)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showFileChooser();
 
-            }
 
-        });
+
 
         ((Button) findViewById(R.id.stop_all_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -435,6 +380,90 @@ public class DevicesActivity extends AppCompatActivity {
                 saveDevicesToPrefs();
             }
         });
+    }
+
+    private void createNewDeviceAction() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(DevicesActivity.this);
+        builder.setTitle("Select device type");
+
+        ArrayAdapter<String> adp = new ArrayAdapter<>(DevicesActivity.this,
+                android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.device_types));
+
+        final Spinner sp = new Spinner(DevicesActivity.this);
+        sp.setAdapter(adp);
+        builder.setView(sp);
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                Intent intent = new Intent(DevicesActivity.this, DeviceSettingsActivity.class);
+
+                Bundle bundle = new Bundle();
+                bundle.putString(DeviceSettingsActivity.KEY_ORGANIZATION_ID, MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID));
+
+                //TODO from resources
+                String type = "Custom";
+                double freq = 1;
+                String paramName = "";
+                int min = 0;
+                int max = 0;
+                Resources res = getResources();
+
+                switch (String.valueOf(sp.getSelectedItem())) {
+                    case "Custom":
+                        type = getString(R.string.type_custom);
+                        paramName = getString(R.string.param_custom);
+                        min = res.getInteger(R.integer.custom_min);
+                        max = res.getInteger(R.integer.custom_max);
+                        freq = res.getInteger(R.integer.custom_frequency);
+                        break;
+                    case "Thermostat":
+                        type = getString(R.string.type_thermostat);
+                        paramName = getString(R.string.param_temperature);
+                        min = res.getInteger(R.integer.temp_min);
+                        max = res.getInteger(R.integer.temp_max);
+                        freq = res.getInteger(R.integer.temp_frequency);
+                        break;
+                    case "Temperature":
+                        type = getString(R.string.type_temperature);
+                        paramName = getString(R.string.param_temperature);
+                        min = res.getInteger(R.integer.temp_min);
+                        max = res.getInteger(R.integer.temp_max);
+                        freq = res.getInteger(R.integer.temp_frequency);
+                        break;
+                    case "Humidity":
+                        type = getString(R.string.type_humidity);
+                        freq = res.getInteger(R.integer.humidity_frequency);
+                        paramName = getString(R.string.param_humidity);
+                        min = res.getInteger(R.integer.humidity_min);
+                        max = res.getInteger(R.integer.humidity_max);
+                        break;
+
+                }
+
+
+                bundle.putString(DeviceSettingsActivity.KEY_TYPE, type);
+                bundle.putString(DeviceSettingsActivity.KEY_FREQ, Double.toString(freq));
+                bundle.putString(DeviceSettingsActivity.KEY_SENSORS, paramName + "+" + min + "+" + max);
+                bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, "random");
+                bundle.putString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES, "1");
+                bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(true));
+                intent.putExtras(bundle);
+
+                startActivityForResult(intent, ADD_DEVICE_SETTINGS_REQ_CODE);
+            }
+        });
+
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private void saveDevicesToPrefs() {
