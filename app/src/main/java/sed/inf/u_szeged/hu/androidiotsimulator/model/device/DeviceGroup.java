@@ -48,16 +48,16 @@ public class DeviceGroup {
 
             if (!Objects.equals(baseDevice.getTraceFileLocation(), "random")) {
                 if (isGenericTrace()) {
-                    String jsonStr = getJsonStr();
-                    newDevice.setTraceData(getTraceFromGroup(jsonStr, i));
+                    //String jsonStr = getJsonStr();
+                    newDevice.setHasTraceData(true);
                     newDevice.setTraceCounter(0);
                 } else {
                     String jsonStr = getJsonStr();
                     newDevice.setOpenweatherTraceData(getOpenWeatherDatas(jsonStr));
-                    newDevice.setTraceData(null);
+                    newDevice.setHasTraceData(false);
                 }
             } else {
-                newDevice.setTraceData(null);
+                newDevice.setHasTraceData(false);
             }
 
 

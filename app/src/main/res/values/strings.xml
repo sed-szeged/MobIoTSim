@@ -25,6 +25,7 @@
         <item>Temperature</item>
         <item>Humidity</item>
         <item>Thermostat</item>
+        <item>Weathergroup</item>
     </string-array>
 
     <string name="title_activity_devices">  Devices</string>
@@ -87,6 +88,7 @@
     <string name="param_temperature">temp</string>
     <string name="param_humidity">humidity</string>
     <string name="save_trace">Save trace</string>
+    <string name="save_btn">Save</string>
     <string name="internet_error">No internet connection!</string>
     <string name="error">Error</string>
     <string name="github_description">Read more about this project on GitHub</string>
@@ -95,6 +97,5 @@
     <string name="specifications">Device specifications</string>
     <string name="set_parameters">Set parameters</string>
     <string name="empty_field">Field is empty!</string>
-
 
 </resources>

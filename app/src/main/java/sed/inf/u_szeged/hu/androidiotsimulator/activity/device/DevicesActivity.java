@@ -439,7 +439,13 @@ public class DevicesActivity extends AppCompatActivity {
                         min = res.getInteger(R.integer.humidity_min);
                         max = res.getInteger(R.integer.humidity_max);
                         break;
-
+                    case "Weathergroup":
+                        type = getString(R.string.type_custom);
+                        paramName = getString(R.string.param_custom);
+                        min = res.getInteger(R.integer.custom_min);
+                        max = res.getInteger(R.integer.custom_max);
+                        freq = res.getInteger(R.integer.custom_frequency);
+                        break;
                 }
 
 

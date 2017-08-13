@@ -18,6 +18,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -65,7 +66,7 @@ public class Device implements Runnable, MqttCallback {
     private boolean saveTrace;
     private FinishedTrace clog;
 
-    private FinishedTrace traceData;
+    private boolean hasTraceData;
     private OpenweatherTrace openweatherTraceData;
 
     public Device(Device copyDevice) {
@@ -89,8 +90,8 @@ public class Device implements Runnable, MqttCallback {
         this.isOn = copyDevice.getisOn();
         this.traceCounter = copyDevice.getTraceCounter();
         this.clog = copyDevice.getClog();
-        this.traceData = copyDevice.getTraceData();
-        this.saveTrace=copyDevice.isSaveTrace();
+        this.hasTraceData = copyDevice.hasTraceData();
+        this.saveTrace = copyDevice.isSaveTrace();
     }
 
     public Device(String organizationID, String typeID, String deviceID, String token, String type, double freq, SensorDataWrapper sensors, String traceFileLocation, int numOfDevices, boolean saveTrace) {
@@ -275,66 +276,82 @@ public class Device implements Runnable, MqttCallback {
         // int value = dataGenerator();
 
         StringBuilder newContent = new StringBuilder();
-        newContent.append("{ \"d\" : { ");
 
-        if (traceFileLocation.equals("random")) {
-            int pos = 0;
-            ParameterWrapper parameterWrapper = new ParameterWrapper();
-            for (SensorData s : sensors.getList()) {
-                String value = String.valueOf(dataGenerator(pos, Integer.parseInt(s.getMinValue()), Integer.parseInt(s.getMaxValue())));
-                newContent.append("\"" + s.getName() + "\" : " + value);
-                if (!s.equals(sensors.getList().get(sensors.getList().size() - 1))) {
-                    newContent.append(" , ");
-                }
-                pos++;
 
-                Parameter logValue = new Parameter(s.getName(), value);
-                parameterWrapper.addValue(logValue);
+        if (type.equals("Weathergroup")) {
 
-            }
-            clog.addLog(parameterWrapper);
+            String txt = DataGenerator.getNextWeatherGroupRandomMsg();
+            System.out.println(txt);
+            newContent.append(txt);
         } else {
 
-            if (traceData != null) {
-                int i = traceCounter % traceData.getLenght();
+            newContent.append("{ \"d\" : { ");
 
+            if (traceFileLocation.equals("random")) {
+                int pos = 0;
+                ParameterWrapper parameterWrapper = new ParameterWrapper();
+                for (SensorData s : sensors.getList()) {
+                    String value = String.valueOf(dataGenerator(pos, Integer.parseInt(s.getMinValue()), Integer.parseInt(s.getMaxValue())));
+                    newContent.append("\"" + s.getName() + "\" : " + value);
+                    if (!s.equals(sensors.getList().get(sensors.getList().size() - 1))) {
+                        newContent.append(" , ");
+                    }
+                    pos++;
 
-                StringBuilder output = new StringBuilder();
-                for (Parameter parameter : traceData.getCycles().get(i).getParameterList()) {
-                    output.append("\"" + parameter.getName() + "\" : " + parameter.getValue() + ",");
+                    Parameter logValue = new Parameter(s.getName(), value);
+                    parameterWrapper.addValue(logValue);
+
                 }
-                int charPos = output.lastIndexOf(",");
-                output.setCharAt(charPos, ' ');
-
-
-                System.out.println(output.toString());
-                newContent.append(output.toString());
-
-                traceCounter++;
+                clog.addLog(parameterWrapper);
             } else {
 
-                int i = traceCounter % openweatherTraceData.getCntcycles();
+                if (hasTraceData) {
 
-                String end = deviceID.substring(deviceID.lastIndexOf("_") + 1);
-                int deviceNum = Integer.parseInt(end) % openweatherTraceData.getCycles().get(0).getCnt();
-
-                StringBuilder output = new StringBuilder();
-                output.append(new Gson().toJson(openweatherTraceData.getCycles().get(i).getList().get(deviceNum), Map.class));
-                System.out.println("GSON FIX TEST:" + new Gson().toJson(openweatherTraceData.getCycles().get(i).getList().get(deviceNum), Map.class));
+                    FileStreamHandler fileStreamHandler = FileStreamHandler.getInstance();
+                    fileStreamHandler.setFilePath(traceFileLocation);
+                    int i = traceCounter % fileStreamHandler.getCnt();
 
 
-                output.deleteCharAt(0);
-                output.deleteCharAt(output.length() - 1);
+                    StringBuilder output = new StringBuilder();
+                    String deviceIdLastThreeChars = deviceID.substring(deviceID.lastIndexOf("_") + 1);
 
-                newContent.append(output.toString());
-                traceCounter++;
+                    List<Parameter> oneCycle = fileStreamHandler.getParameterValuesForDevice(Integer.parseInt(deviceIdLastThreeChars), i);
+
+                    for (Parameter parameter : oneCycle) {
+                        output.append("\"" + parameter.getName() + "\" : " + parameter.getValue() + ",");
+                    }
+                    int charPos = output.lastIndexOf(",");
+                    output.setCharAt(charPos, ' ');
+
+
+                    System.out.println(output.toString());
+                    newContent.append(output.toString());
+
+                    traceCounter++;
+                } else {
+
+                    int i = traceCounter % openweatherTraceData.getCntcycles();
+
+                    String end = deviceID.substring(deviceID.lastIndexOf("_") + 1);
+                    int deviceNum = Integer.parseInt(end) % openweatherTraceData.getCycles().get(0).getCnt();
+
+                    StringBuilder output = new StringBuilder();
+                    output.append(new Gson().toJson(openweatherTraceData.getCycles().get(i).getList().get(deviceNum), Map.class));
+                    System.out.println("GSON FIX TEST:" + new Gson().toJson(openweatherTraceData.getCycles().get(i).getList().get(deviceNum), Map.class));
+
+
+                    output.deleteCharAt(0);
+                    output.deleteCharAt(output.length() - 1);
+
+                    newContent.append(output.toString());
+                    traceCounter++;
+                }
             }
+
+            newContent.append(" } }");
+
         }
-
         //newContent.append("\"main\": {\"temp\": 8,\"pressure\": 1020,\"humidity\": 75,\"temp_min\": 8,\"temp_max\": 8\t}");
-
-
-        newContent.append(" } }");
 
 
         //String content = "{ \"d\" : { \"data\" : " + value + " } }";
@@ -670,16 +687,16 @@ public class Device implements Runnable, MqttCallback {
         return clog;
     }
 
-    public FinishedTrace getTraceData() {
-        return traceData;
+    public boolean hasTraceData() {
+        return hasTraceData;
     }
 
     public void setTraceCounter(int traceCounter) {
         this.traceCounter = traceCounter;
     }
 
-    public void setTraceData(FinishedTrace traceData) {
-        this.traceData = traceData;
+    public void setHasTraceData(boolean hasTraceData) {
+        this.hasTraceData = hasTraceData;
     }
 
     public void setOpenweatherTraceData(OpenweatherTrace openweatherTraceData) {
@@ -737,7 +754,7 @@ public class Device implements Runnable, MqttCallback {
                 ", isOn=" + isOn +
                 ", traceCounter=" + traceCounter +
                 ", clog=" + clog +
-                ", traceData=" + traceData +
+                ", hasTraceData=" + hasTraceData +
                 '}';
     }
 
