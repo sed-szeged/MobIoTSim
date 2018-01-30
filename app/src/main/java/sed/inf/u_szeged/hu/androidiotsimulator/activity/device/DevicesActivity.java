@@ -446,6 +446,62 @@ public class DevicesActivity extends AppCompatActivity {
                         max = res.getInteger(R.integer.custom_max);
                         freq = res.getInteger(R.integer.custom_frequency);
                         break;
+                    case "Brightness":
+                        type = getString(R.string.type_brightness);
+                        paramName = getString(R.string.param_brightness);
+                        min = res.getInteger(R.integer.brightness_min);
+                        max = res.getInteger(R.integer.brightness_max);
+                        freq = res.getInteger(R.integer.brightness_frequency);
+                        break;
+                    case "Pressure":
+                        type = getString(R.string.type_pressure);
+                        paramName = getString(R.string.param_pressure);
+                        min = res.getInteger(R.integer.pressure_min);
+                        max = res.getInteger(R.integer.pressure_max);
+                        freq = res.getInteger(R.integer.pressure_frequency);
+                        break;
+                    case "Noise":
+                        type = getString(R.string.type_noise);
+                        paramName = getString(R.string.param_noise);
+                        min = res.getInteger(R.integer.noise_min);
+                        max = res.getInteger(R.integer.noise_max);
+                        freq = res.getInteger(R.integer.noise_frequency);
+                        break;
+                    case "Gas":
+                        type = getString(R.string.type_gas);
+                        paramName = getString(R.string.param_gas);
+                        min = res.getInteger(R.integer.gas_min);
+                        max = res.getInteger(R.integer.gas_max);
+                        freq = res.getInteger(R.integer.gas_frequency);
+                        break;
+                    case "Outside temperature (summer)":
+                        type = getString(R.string.type_summer);
+                        paramName = getString(R.string.param_temperature);
+                        min = res.getInteger(R.integer.summer_min);
+                        max = res.getInteger(R.integer.summer_max);
+                        freq = res.getInteger(R.integer.summer_frequency);
+                        break;
+                    case "Outside temperature (winter)":
+                        type = getString(R.string.type_winter);
+                        paramName = getString(R.string.param_temperature);
+                        min = res.getInteger(R.integer.winter_min);
+                        max = res.getInteger(R.integer.winter_max);
+                        freq = res.getInteger(R.integer.winter_frequency);
+                        break;
+                    case "Outside temperature (spring/fall)":
+                        type = getString(R.string.type_spring);
+                        paramName = getString(R.string.param_temperature);
+                        min = res.getInteger(R.integer.spring_min);
+                        max = res.getInteger(R.integer.spring_max);
+                        freq = res.getInteger(R.integer.spring_frequency);
+                        break;
+                    case "Smart city":
+                        type = getString(R.string.type_custom);
+                        paramName = getString(R.string.param_custom);
+                        min = res.getInteger(R.integer.custom_min);
+                        max = res.getInteger(R.integer.custom_max);
+                        freq = res.getInteger(R.integer.custom_frequency);
+                        break;
                 }
 
 

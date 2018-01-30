@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/AndroidIoTSimulator.iml" filepath="$PROJECT_DIR$/AndroidIoTSimulator.iml" />
+      <module fileurl="file://C:\Users\Mate\Documents\MobIoTSim-DEV-tbirkas\AndroidIoTSimulator.iml" filepath="C:\Users\Mate\Documents\MobIoTSim-DEV-tbirkas\AndroidIoTSimulator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MobIoTSim-DEV-mlevai.iml" filepath="$PROJECT_DIR$/MobIoTSim-DEV-mlevai.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
