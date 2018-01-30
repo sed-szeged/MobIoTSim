@@ -283,6 +283,12 @@ public class Device implements Runnable, MqttCallback {
             String txt = DataGenerator.getNextWeatherGroupRandomMsg();
             System.out.println(txt);
             newContent.append(txt);
+        } else if (type.equals("Smart city")){
+
+            String txt = DataGenerator.getNextSmartCityRandomMsg();
+            System.out.println(txt);
+            newContent.append(txt);
+
         } else {
 
             newContent.append("{ \"d\" : { ");

@@ -26,6 +26,15 @@
         <item>Humidity</item>
         <item>Thermostat</item>
         <item>Weathergroup</item>
+        <item>Brightness</item>
+        <item>Pressure</item>
+        <item>Noise</item>
+        <item>Gas</item>
+        <item>Outside temperature (summer)</item>
+        <item>Outside temperature (winter)</item>
+        <item>Outside temperature (spring/fall)</item>
+        <item>Smart city</item>
+
     </string-array>
 
     <string name="title_activity_devices">  Devices</string>
@@ -85,8 +94,19 @@
     <string name="type_thermostat">Thermostat</string>
     <string name="type_temperature">Temperature</string>
     <string name="type_humidity">Humidity</string>
+    <string name="type_brightness">Brightness</string>
+    <string name="type_pressure">Pressure</string>
+    <string name="type_noise">Noise</string>
+    <string name="type_gas">Gas</string>
+    <string name="type_summer">Outside temp summer</string>
+    <string name="type_winter">Outside temp winter</string>
+    <string name="type_spring">Outside temp spring/fall</string>
     <string name="param_temperature">temp</string>
     <string name="param_humidity">humidity</string>
+    <string name="param_brightness">brightness</string>
+    <string name="param_pressure">pressure</string>
+    <string name="param_noise">noise</string>
+    <string name="param_gas">gas</string>
     <string name="save_trace">Save trace</string>
     <string name="save_btn">Save</string>
     <string name="internet_error">No internet connection!</string>

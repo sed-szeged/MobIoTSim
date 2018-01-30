@@ -16,4 +16,32 @@
     <integer name="humidity_min">1</integer>
     <integer name="humidity_max">10</integer>
 
+    <integer name="brightness_frequency">10</integer>
+    <integer name="brightness_min">1</integer>
+    <integer name="brightness_max">750</integer>
+
+    <integer name="pressure_frequency">10</integer>
+    <integer name="pressure_min">900</integer>
+    <integer name="pressure_max">1500</integer>
+
+    <integer name="noise_frequency">1</integer>
+    <integer name="noise_min">3</integer>
+    <integer name="noise_max">7</integer>
+
+    <integer name="gas_frequency">10</integer>
+    <integer name="gas_min">380</integer>
+    <integer name="gas_max">450</integer>
+
+    <integer name="summer_frequency">1</integer>
+    <integer name="summer_min">20</integer>
+    <integer name="summer_max">40</integer>
+
+    <integer name="winter_frequency">1</integer>
+    <integer name="winter_min">-20</integer>
+    <integer name="winter_max">5</integer>
+
+    <integer name="spring_frequency">1</integer>
+    <integer name="spring_min">5</integer>
+    <integer name="spring_max">20</integer>
+
 </resources>
