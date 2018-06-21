@@ -212,8 +212,9 @@ public class Device implements Runnable, MqttCallback {
         System.out.println("eventID:" + eventID);
 
         //TODO SSL
+        //https://console.bluemix.net/docs/services/IoT/reference/security/connect_devices_apps_gw.html#client_port_security
         String broker_prefix = "tcp://";
-        String broker_suffix = ".messaging.internetofthings.ibmcloud.com:1883";
+        String broker_suffix = ".messaging.internetofthings.ibmcloud.com:8883";
         String broker = broker_prefix + organizationID + broker_suffix;
 
 
