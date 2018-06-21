@@ -12,17 +12,26 @@
     tools:context="sed.inf.u_szeged.hu.androidiotsimulator.activity.main.InformationActivity"
     tools:showIn="@layout/activity_information">
 
-
     <Button
         android:id="@+id/github"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginTop="24dp"
-        android:text="@string/github_link" />
+        android:layout_marginTop="13dp"
+        android:text="@string/github_link"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/github_description"
+        android:layout_marginTop="23dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>

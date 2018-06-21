@@ -39,8 +39,8 @@ public class MobIoTApplication extends Application {
     // Method for saving data to the shared preferences
     public static void saveData(String key, String data) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(key, new String(data));
-        editor.commit();
+        editor.putString(key, data);
+        editor.apply();
     }
 
     // Loading data from shared preferences
@@ -49,14 +49,14 @@ public class MobIoTApplication extends Application {
         if (d == null) {
             return null;
         } else {
-            return new String(d);
+            return d;
         }
     }
 
     public static String convertStreamToString(InputStream is) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
-        String line = null;
+        String line;
         while ((line = reader.readLine()) != null) {
             sb.append(line);
 
@@ -71,7 +71,6 @@ public class MobIoTApplication extends Application {
         String ret = convertStreamToString(fin);
         fin.close();
         return ret;
-
     }
 
 }

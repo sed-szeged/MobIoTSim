@@ -2,22 +2,68 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:weightSum="1">
 
-    <ImageView
-        android:id="@+id/swtich"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_margin="4dp"
-        android:src="@drawable/ic_off_circle"
-        android:visibility="visible" />
-
-    <TextView
-        android:id="@+id/device_id"
+      <LinearLayout
+        android:id="@+id/on_off_container"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+        android:orientation="vertical"
+        android:layout_marginRight="5dp"
+        android:visibility="visible" >
+
+        <TextView
+            android:id="@+id/on_devices_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:text="ON:"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large" />
+
+        <TextView
+            android:id="@+id/off_devices_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OFF:"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
         android:layout_weight="1"
-        android:text="@string/device_id_alt" />
+        android:orientation="vertical"
+        android:paddingTop="5dp"
+        android:weightSum="1">
+
+        <TextView
+            android:id="@+id/device_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.57"
+            android:text="@string/device_id_alt"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/subdevices_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/subdevices" />
+
+            <TextView
+                android:id="@+id/subdevices_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0" />
+        </LinearLayout>
+    </LinearLayout>
 
 
     <View

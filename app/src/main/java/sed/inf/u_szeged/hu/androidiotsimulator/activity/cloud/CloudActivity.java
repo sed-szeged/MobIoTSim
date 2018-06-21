@@ -3,6 +3,7 @@ package sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -46,12 +47,11 @@ public class CloudActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-       MobIoTApplication.setActivity(this);
+        MobIoTApplication.setActivity(this);
     }
 
     private void initializeButtons() {
-        ((Button) findViewById(R.id.new_btn)).setOnClickListener(new View.OnClickListener() {
+        ((FloatingActionButton) findViewById(R.id.new_cloud_fab)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -126,7 +126,6 @@ public class CloudActivity extends AppCompatActivity {
 
                     bundle.putString(CloudSettingsActivity.KEY_EVENT_ID,
                             cloudSettingsWrappers.get(position).getEventID());
-
                 }
 
                 bundle.putString(CloudSettingsActivity.KEY_NAME,
@@ -283,6 +282,7 @@ public class CloudActivity extends AppCompatActivity {
                     (findViewById(R.id.app_id_container)).setVisibility(View.GONE);
                     (findViewById(R.id.key_container)).setVisibility(View.GONE);
                     (findViewById(R.id.token_container)).setVisibility(View.GONE);
+                    (findViewById(R.id.connection_type_container)).setVisibility(View.GONE);
 
                     String connectionType = "true";
 
@@ -373,18 +373,6 @@ public class CloudActivity extends AppCompatActivity {
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String item = (String) parent.getItemAtPosition(position);
-                //Toast.makeText(CloudActivity.this, "Selected: " + item, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
     }
 
 

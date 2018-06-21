@@ -1,14 +1,22 @@
 package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.DocumentsContract;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,7 +30,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,11 +42,14 @@ import java.util.StringTokenizer;
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.ParameterAdapter;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorData;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.JsonDevice;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.Sensor;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.GsonDevice;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.Sensor;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.devicetype.Result;
 import sed.inf.u_szeged.hu.androidiotsimulator.views.ExpandedListView;
 
 public class DeviceSettingsActivity extends AppCompatActivity {
@@ -53,9 +63,11 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     public static final String KEY_FREQ = "FREQ";
     public static final String KEY_EDIT_IT = "EDIT_IT";
     public static final String KEY_SENSORS = "SENSORS";
-    public static final String KEY_REPLAY_LOCATION = "REPLAYLOCATION";
+    public static final String KEY_TRACE_LOCATION = "TRACELOCATION";
+    public static final String KEY_NUM_OF_DEVICES = "NUM_OF_DEVICES";
+    public static final String KEY_SAVE_TRACE = "SAVE TRACE";
     public static final int MSG_W_DELETE_PARAMETER = 39;
-    private static final int IMPORT_REPLAY_LOCATION_REQ_CODE = 6544;
+    private static final int IMPORT_TRACE_LOCATION_REQ_CODE = 6544;
     private static ParameterAdapter adapter;
     public Handler handler = new Handler() {
         @Override
@@ -74,8 +86,11 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     ExpandedListView listView;
     File myExternalFile;
     Gson gson = new Gson();
-    String replayFileLocation;
+    String traceFileLocation;
     Switch aSwitch;
+    Resources res;
+    ArrayList<String> deviceTypeIds;
+    RESTTools restTools;
 
     private static boolean isExternalStorageReadOnly() {
         String extStorageState = Environment.getExternalStorageState();
@@ -104,7 +119,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == IMPORT_REPLAY_LOCATION_REQ_CODE) {
+        if (requestCode == IMPORT_TRACE_LOCATION_REQ_CODE) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
                     // Get the URI of the selected file
@@ -112,12 +127,13 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                     System.out.println("Uri = " + uri.toString());
                     try {
                         // Get the file path from the URI
-                        final String path = FileUtils.getPath(this, uri);
+
+                        final String path = getRealPathFromURI(uri);
                         Toast.makeText(DeviceSettingsActivity.this,
                                 "File imported: " + path, Toast.LENGTH_LONG).show();
-                        replayFileLocation = path;
-                        System.out.print("replayFileLocation= " + replayFileLocation);
-                        ((TextView) findViewById(R.id.replay_import_location)).setText(replayFileLocation);
+                        traceFileLocation = path;
+                        System.out.print("traceFileLocation= " + traceFileLocation);
+                        ((TextView) findViewById(R.id.trace_import_location)).setText(traceFileLocation);
                     } catch (Exception e) {
                         System.out.println("DeviceSettingsActivity" + " File select error" + e);
                     }
@@ -127,12 +143,40 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         }
     }
 
+
+    private String getRealPathFromURI(Uri contentURI) {
+        final String docId = DocumentsContract.getDocumentId(contentURI);
+        final String[] split = docId.split(":");
+        return Environment.getExternalStorageDirectory() + "/" + split[1];
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_settings);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+        String auth_key = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_KEY);
+        String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
+        String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
+
+        restTools = new RESTTools(orgId, auth_key, auth_token, getApplicationContext());
+
         MobIoTApplication.setActivity(this);
+
+        res = getResources();
 
         listView = (ExpandedListView) findViewById(R.id.list);
         SensorDataWrapper sdw;
@@ -143,14 +187,17 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton cb, boolean on) {
                 if (on) {
                     //Do something when Switch button is on/checked
-                    replayFileLocation = "random";
+                    traceFileLocation = "random";
+                    ((Switch) findViewById(R.id.sw_save_trace)).setChecked(true);
+
                     findViewById(R.id.parameter_container).setVisibility(View.VISIBLE);
-                    findViewById(R.id.replay_container).setVisibility(View.GONE);
+                    findViewById(R.id.trace_container).setVisibility(View.GONE);
 
                 } else {
                     //Do something when Switch is off/unchecked
+                    ((Switch) findViewById(R.id.sw_save_trace)).setChecked(false);
                     findViewById(R.id.parameter_container).setVisibility(View.GONE);
-                    findViewById(R.id.replay_container).setVisibility(View.VISIBLE);
+                    findViewById(R.id.trace_container).setVisibility(View.VISIBLE);
 
 
                 }
@@ -166,7 +213,10 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         } else {
             System.out.println("else");
-            sdw = SensorDataWrapper.sensorDataFromSerial("empty1+1+5*empty2+-1+30");
+            String paramName = res.getString(R.string.new_paramter_name);
+            String min = String.valueOf(res.getInteger(R.integer.new_parameter_min));
+            String max = String.valueOf(res.getInteger(R.integer.new_parameter_max));
+            sdw = SensorDataWrapper.sensorDataFromSerial(paramName + "+" + min + "+" + max);
             System.out.println("DeviceSettingsActivity bundle null");
             initTypeSpinner(0);
 
@@ -178,45 +228,48 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         getApplicationContext().setTheme(R.style.AppTheme);
 
 
-        ((Button) findViewById(R.id.ok_btn)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtras(getData());
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        });
+//        ((Button) findViewById(R.id.ok_btn)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent();
+//                intent.putExtras(getData());
+//                setResult(Activity.RESULT_OK, intent);
+//                finish();
+//            }
+//        });
 
-        ((Button) findViewById(R.id.cancel_btn)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtra("result", getData());
-                setResult(Activity.RESULT_CANCELED, intent);
-                finish();
-            }
-        });
+//        ((Button) findViewById(R.id.cancel_btn)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent();
+//                intent.putExtra("result", getData());
+//                setResult(Activity.RESULT_CANCELED, intent);
+//                finish();
+//            }
+//        });
 
 
         ((Button) findViewById(R.id.add_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.add(new SensorData("empty", "0", "0"));
+                String paramName = res.getString(R.string.new_paramter_name);
+                String min = String.valueOf(res.getInteger(R.integer.new_parameter_min));
+                String max = String.valueOf(res.getInteger(R.integer.new_parameter_max));
+                adapter.add(new SensorData(paramName, min, max));
             }
         });
 
 
-        ((Button) findViewById(R.id.save_btn)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveDeviceToJson();
+//        ((Button) findViewById(R.id.export_btn)).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                        saveDeviceToJson();
+//
+//
+//            }
+//        });
 
-
-            }
-        });
-
-        ((Button) findViewById(R.id.replay_import_btn)).setOnClickListener(new View.OnClickListener() {
+        ((Button) findViewById(R.id.trace_import_btn)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showFileChooser();
@@ -224,9 +277,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         });
 
 
-        if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
-            ((Button) findViewById(R.id.save_btn)).setEnabled(false);
-        }
+//        if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
+//            ((Button) findViewById(R.id.export_btn)).setEnabled(false);
+//        }
 
 
         listView.setOnTouchListener(new View.OnTouchListener()
@@ -248,16 +301,19 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
     private void saveDeviceToJson() {
         try {
-            myExternalFile = new File(getExternalFilesDir("SavedDevices"), ((EditText) findViewById(R.id.device_id_et)).getText() + ".json");
+            String fileName = "base_" + ((EditText) findViewById(R.id.device_id_et)).getText() + ".json";
+            myExternalFile = new File(getExternalFilesDir("SavedDevices"), fileName);
             FileOutputStream fos = new FileOutputStream(myExternalFile);
 
-            JsonDevice jsonDevice = new JsonDevice();
-            jsonDevice.setOrganizationId((String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem());
-            jsonDevice.setDeviceId(((EditText) findViewById(R.id.device_id_et)).getText().toString());
-            jsonDevice.setTypeId(((EditText) findViewById(R.id.type_id_et)).getText().toString());
-            jsonDevice.setToken(((EditText) findViewById(R.id.token_et)).getText().toString());
-            jsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
-            jsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
+            GsonDevice gsonDevice = new GsonDevice();
+            gsonDevice.setOrganizationId((String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem());
+            gsonDevice.setDeviceId(((EditText) findViewById(R.id.device_id_et)).getText().toString());
+            gsonDevice.setTypeId(String.valueOf(((Spinner) findViewById(R.id.typeid_spinner)).getSelectedItem()));
+            gsonDevice.setToken(((EditText) findViewById(R.id.token_et)).getText().toString());
+            gsonDevice.setType(String.valueOf(((Spinner) findViewById(R.id.type_spinner)).getSelectedItem()));
+            gsonDevice.setFreq(Double.parseDouble(((EditText) findViewById(R.id.freq_value_et)).getText().toString()));
+            gsonDevice.setNumOfDevices(Integer.parseInt(((EditText) findViewById(R.id.numofdevices_et)).getText().toString()));
+            gsonDevice.setSaveTrace(((Switch) findViewById(R.id.sw_save_trace)).isChecked());
 
             List<Sensor> list = new ArrayList<>();
             SensorDataWrapper sensorDataWrapper = new SensorDataWrapper(adapter.getResult());
@@ -269,13 +325,13 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 list.add(sensor);
             }
 
-            jsonDevice.setSensors(list);
-            jsonDevice.setReplayFileLocation(replayFileLocation); //TODO: // FIXME: 1/27/2017
+            gsonDevice.setSensors(list);
+            gsonDevice.setTraceFileLocation(traceFileLocation); //TODO: // FIXME: 1/27/2017
 
-            String outputString = gson.toJson(jsonDevice);
+            String outputString = gson.toJson(gsonDevice);
             fos.write(outputString.getBytes());
             fos.close();
-            Toast.makeText(DeviceSettingsActivity.this, "File saved: " + ((EditText) findViewById(R.id.device_id_et)).getText() + ".json", Toast.LENGTH_SHORT).show();
+            Toast.makeText(DeviceSettingsActivity.this, "File saved: " + fileName, Toast.LENGTH_SHORT).show();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -344,38 +400,25 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
                 EditText freqET = (EditText) findViewById(R.id.freq_value_et);
-//                EditText minET = (EditText)findViewById(R.id.min_value_et);
-//                EditText maxET = (EditText)findViewById(R.id.max_value_et);
 
                 switch (position) {
                     case 0:
                         freqET.setEnabled(true);
-//                        minET.setEnabled(true);
-//                        maxET.setEnabled(true);
+
                         break;
                     case 1:
                         freqET.setText("1.0");
                         freqET.setEnabled(false);
-//                        minET.setText("-25");
-//                        minET.setEnabled(false);
-//                        minET.setText("25");
-//                        maxET.setEnabled(false);
+
                         break;
                     case 2:
                         freqET.setText("10.0");
                         freqET.setEnabled(false);
-//                        minET.setText("25");
-//                        minET.setEnabled(false);
-//                        minET.setText("85");
-//                        maxET.setEnabled(false);
+
                         break;
                     case 3:
                         freqET.setText("1.0");
                         freqET.setEnabled(false);
-//                        minET.setText("-25");
-//                        minET.setEnabled(false);
-//                        minET.setText("25");
-//                        maxET.setEnabled(false);
                         break;
 
                 }
@@ -400,12 +443,14 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     private Bundle getData() {
         Bundle bundle = new Bundle();
 
-        String type_id = ((EditText) findViewById(R.id.type_id_et)).getText().toString();
+        String type_id = String.valueOf(((Spinner) findViewById(R.id.typeid_spinner)).getSelectedItem());
         String device_id = ((EditText) findViewById(R.id.device_id_et)).getText().toString();
         String token = ((EditText) findViewById(R.id.token_et)).getText().toString();
         String organization_id = (String) ((Spinner) findViewById(R.id.orgid_spinner)).getSelectedItem();
         String type = (String) ((Spinner) findViewById(R.id.type_spinner)).getSelectedItem();
         String freq = ((EditText) findViewById(R.id.freq_value_et)).getText().toString();
+        String num = ((EditText) findViewById(R.id.numofdevices_et)).getText().toString();
+        String saveTrace = String.valueOf(((Switch) findViewById(R.id.sw_save_trace)).isChecked());
         SensorDataWrapper paramResults = new SensorDataWrapper(adapter.getResult());
 
         System.out.println("getData " +
@@ -414,18 +459,21 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 "\ntoken:" + token +
                 "\norganization_id:" + organization_id +
                 "\ntype:" + type +
+                "\nnum: " + num +
                 "\nfreq:" + freq +
                 "\nsensordata: " + paramResults +
-                "\nreplaylocation:" + replayFileLocation);
+                "\ntracelocation:" + traceFileLocation);
 
         bundle.putString(KEY_TYPE_ID, type_id);
         bundle.putString(KEY_DEVICE_ID, device_id);
         bundle.putString(KEY_TOKEN, token);
         bundle.putString(KEY_ORGANIZATION_ID, organization_id);
+        bundle.putString(KEY_NUM_OF_DEVICES, num);
         bundle.putString(KEY_TYPE, type);
         bundle.putString(KEY_FREQ, freq);
         bundle.putString(KEY_SENSORS, paramResults.toString());
-        bundle.putString(KEY_REPLAY_LOCATION, replayFileLocation);
+        bundle.putString(KEY_TRACE_LOCATION, traceFileLocation);
+        bundle.putString(KEY_SAVE_TRACE, saveTrace);
 
         if (editId != null) {
             bundle.putString(KEY_EDIT_IT, editId);
@@ -434,11 +482,13 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         return bundle;
     }
 
+
     private void setData(Bundle bundle) {
+
         String type_id = bundle.getString(KEY_TYPE_ID);
-        if (type_id != null && !type_id.trim().equals("")) {
-            ((EditText) findViewById(R.id.type_id_et)).setText(type_id);
-        }
+
+        new TypeSpinnerFillingTask(type_id).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
 
         String device_id = bundle.getString(KEY_DEVICE_ID);
         if (device_id != null && !device_id.trim().equals("")) {
@@ -471,17 +521,24 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.freq_value_et)).setText(freq);
         }
 
+        String numOfDevices = bundle.getString(KEY_NUM_OF_DEVICES);
+        if (numOfDevices != null && !numOfDevices.trim().equals("")) {
+            ((EditText) findViewById(R.id.numofdevices_et)).setText(numOfDevices);
+        }
 
-        if (!Objects.equals(bundle.getString(KEY_REPLAY_LOCATION), "random")) {
+        String saveTrace = bundle.getString(KEY_SAVE_TRACE);
+        if (saveTrace != null && !saveTrace.trim().equals("")) {
+            ((Switch) findViewById(R.id.sw_save_trace)).setChecked(Boolean.parseBoolean(saveTrace));
+        }
+
+        if (!Objects.equals(bundle.getString(KEY_TRACE_LOCATION), "random")) {
             aSwitch.setChecked(false);
-            ((TextView) findViewById(R.id.replay_import_location)).setText(bundle.getString(KEY_REPLAY_LOCATION));
+            ((TextView) findViewById(R.id.trace_import_location)).setText(bundle.getString(KEY_TRACE_LOCATION));
 
-            //    ((TextView) findViewById(R.id.replay_import_location)).setText("ooooooo");
-            replayFileLocation = bundle.getString(KEY_REPLAY_LOCATION);
-            //findViewById(R.id.replay_import_btn).setVisibility(View.VISIBLE);
-            //((LinearLayout) findViewById(R.id.replay_container)).setVisibility(View.VISIBLE);
+            traceFileLocation = bundle.getString(KEY_TRACE_LOCATION);
+
         } else {
-            replayFileLocation = "random";
+            traceFileLocation = "random";
         }
 
         System.out.println("setData " +
@@ -491,20 +548,171 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                 "\nfreq:" + freq);
     }
 
+    private void initTypeIdSpinner(String type_id) {
+        Spinner spinner = (Spinner) findViewById(R.id.typeid_spinner);
+        ArrayList<String> typeIds = deviceTypeIds;
+
+        if (typeIds.contains("Create new type...")) {
+            typeIds.remove("Create new type...");
+        }
+
+        typeIds.add("Create new type...");
+        final int positionOfLast = typeIds.size() - 1;
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, typeIds);
+        // Specify the layout to use when the list of choices appears
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(spinnerAdapter);
+        int selectedPos = deviceTypeIds.indexOf(type_id);
+        spinner.setSelection(selectedPos);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                if (position == positionOfLast) {
+                    System.out.println("New selected");
+                    showInputDialog();
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+
+
+    private void showInputDialog() {
+        LayoutInflater layoutInflater = LayoutInflater.from(DeviceSettingsActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.input_dialog, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DeviceSettingsActivity.this);
+        alertDialogBuilder.setView(promptView);
+
+        final EditText editText = (EditText) promptView.findViewById(R.id._dialog_input_et);
+        // setup a dialog window
+        alertDialogBuilder.setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String newType = String.valueOf(editText.getText());
+                        deviceTypeIds.add(newType);
+                        initTypeIdSpinner(newType);
+                        restTools.addDeviceType("{ \"id\" : \"" + newType + "\" }");
+
+                    }
+                })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create an alert dialog
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+    }
+
 
     private void showFileChooser() {
-        // Use the GET_CONTENT intent from the utility class
-        Intent target = FileUtils.createGetContentIntent();
-        // Create the chooser Intent
-        Intent intent = Intent.createChooser(
-                target, "choose file");
-        try {
-            startActivityForResult(intent, IMPORT_REPLAY_LOCATION_REQ_CODE);
-        } catch (ActivityNotFoundException e) {
-            // The reason for the existence of aFileChooser
-            System.out.println("Can't show the file chooser: " + e);
+
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, IMPORT_TRACE_LOCATION_REQ_CODE);
+    }
+
+
+    private class TypeSpinnerFillingTask extends AsyncTask<String, String, Void> {
+
+
+        String defaultTypeid;
+        List<Result> jsonTypeIds;
+
+        TypeSpinnerFillingTask(String defaultTypeId) {
+            this.defaultTypeid = defaultTypeId;
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+
+            jsonTypeIds = restTools.getDeviceTypes();
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            deviceTypeIds = new ArrayList<>();
+            for (Result result : jsonTypeIds) {
+                deviceTypeIds.add(result.getId());
+            }
+            initTypeIdSpinner(defaultTypeid);
         }
     }
 
 
+    private boolean areFieldsFilled() {
+        boolean result = true;
+        if (((EditText) findViewById(R.id.device_id_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.device_id_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.token_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.token_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.numofdevices_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.numofdevices_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.freq_value_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.freq_value_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+        return result;
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_device_settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_save) {
+            if (areFieldsFilled()) {
+                Intent intent = new Intent();
+                intent.putExtras(getData());
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
+        }
+
+        if (id == R.id.action_export) {
+            saveDeviceToJson();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        finish();
+        return true;
+    }
 }
+
+
