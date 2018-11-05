@@ -1,5 +1,10 @@
 # MobIoTSim
 
+When using the simulator for scientific research please cite the following paper:
+[A. Kertesz, T. Pflanzner, T. Gyimothy, 
+A Mobile IoT Device Simulator for IoT-Fog-Cloud Systems. Journal of Grid 
+Computing, 2018.](https://www.researchgate.net/publication/327906907_A_Mobile_IoT_Device_Simulator_for_IoT-Fog-Cloud_Systems) DOI: [10.1007/s10723-018-9468-9](https://link.springer.com/article/10.1007/s10723-018-9468-9)
+
 ### MobIoTSim with Bluemix
 
 Here you can find information about MobIoTSim, an Android application for simulating an Internet of Things environment.
