@@ -169,9 +169,9 @@ public class CloudActivity extends AppCompatActivity {
                 wrappers.add(CloudSettingsWrapper.fromSerial(cloudSerial));
             }
         } else {
-            CloudSettingsWrapper demoBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX_DEMO);
-            wrappers.add(demoBluemix);
-            CloudSettingsWrapper myBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "myBluemix", "wg3go6", false, 1883, "mobiotsim", "empty", "empty", "cmd", "status");
+            //CloudSettingsWrapper demoBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX_DEMO);
+            //wrappers.add(demoBluemix);
+            CloudSettingsWrapper myBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "iotgateway", "tcp://192.168.1.41:1883", false, 1883, "mobiotsim", "empty", "empty", "cmd", "status");
             wrappers.add(myBluemix);
         }
 

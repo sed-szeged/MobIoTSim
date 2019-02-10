@@ -44,7 +44,11 @@ public class DeviceGroup {
 
         for (int i = 0; i < numOfDevices; i++) {
             Device newDevice = new Device(this.baseDevice);
-            newDevice.setDeviceID(deviceId + "_" + generateIdNumber(i));
+            if(i==0){
+                newDevice.setDeviceID(deviceId);
+            }else{
+                newDevice.setDeviceID(deviceId + "_" + generateIdNumber(i));
+            }
 
             if (!Objects.equals(baseDevice.getTraceFileLocation(), "random")) {
                 if (isGenericTrace()) {
@@ -64,7 +68,7 @@ public class DeviceGroup {
             devicesList.add(newDevice);
         }
 
-        saveToCloud();
+        //saveToCloud();
     }
 
 
@@ -94,9 +98,9 @@ public class DeviceGroup {
         }
 
         if (baseDevice.getTraceFileLocation().equals("random") && baseDevice.isSaveTrace()) {
-            finishedTraceList.setCnt(finishedTraceList.getTraceGroup().get(0).getCycles().size());
-            finishedTraceList.setType(GENERIC_DEVICE_TRACE);
-            saveTraceToJson(ctx);
+            //finishedTraceList.setCnt(finishedTraceList.getTraceGroup().get(0).getCycles().size());
+            //finishedTraceList.setType(GENERIC_DEVICE_TRACE);
+            //saveTraceToJson(ctx);
         }
     }
 
@@ -165,7 +169,7 @@ public class DeviceGroup {
         String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
 
         RESTTools restTools = new RESTTools(orgId, auth_key, auth_token, context);
-        restTools.removeDevice(finalJson);
+        //restTools.removeDevice(finalJson);
     }
 
     public boolean isWarning() {

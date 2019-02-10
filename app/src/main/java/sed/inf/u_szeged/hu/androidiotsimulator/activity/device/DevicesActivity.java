@@ -295,10 +295,11 @@ public class DevicesActivity extends AppCompatActivity {
         if (deviceGroupList.size() == 0) {
             System.out.println("empty devices");
             String organizationId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
-            DeviceGroup d = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice01", "RFoDC-zKRO_BJ*d+x8",
+
+            DeviceGroup d = new DeviceGroup(new Device(organizationId, "mytype", "myname", "mypass",
                     "Custom", 1, SensorDataWrapper.sensorDataFromSerial("parameter1+1+30"), "random", 1, true), getApplicationContext());
             deviceGroupList.add(d);
-            DeviceGroup d2 = new DeviceGroup(new Device(organizationId, "MobIoTSimType", "MobIoTSimDevice02", "8f3n4rE?rnA-rCF-vR",
+            DeviceGroup d2 = new DeviceGroup(new Device(organizationId, "mytype", "mydevice", "mypass",
                     "Custom", 2, SensorDataWrapper.sensorDataFromSerial("parameter1+10+25"), "random", 1, true), getApplicationContext());
             deviceGroupList.add(d2);
 

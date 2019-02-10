@@ -601,7 +601,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                         String newType = String.valueOf(editText.getText());
                         deviceTypeIds.add(newType);
                         initTypeIdSpinner(newType);
-                        restTools.addDeviceType("{ \"id\" : \"" + newType + "\" }");
+                        //restTools.addDeviceType("{ \"id\" : \"" + newType + "\" }");
 
                     }
                 })
@@ -640,7 +640,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
 
-            jsonTypeIds = restTools.getDeviceTypes();
+            //jsonTypeIds = restTools.getDeviceTypes();
 
             return null;
         }
@@ -648,9 +648,11 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             deviceTypeIds = new ArrayList<>();
-            for (Result result : jsonTypeIds) {
-                deviceTypeIds.add(result.getId());
-            }
+            //for (Result result : jsonTypeIds) {
+            //    deviceTypeIds.add(result.getId());
+            //}
+
+            deviceTypeIds.add("mytype");
             initTypeIdSpinner(defaultTypeid);
         }
     }
