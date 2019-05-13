@@ -21,6 +21,7 @@
     </string-array>
 
     <string-array name="device_types">
+        <item>Bracelet</item>
         <item>Custom</item>
         <item>Temperature</item>
         <item>Humidity</item>
@@ -97,5 +98,9 @@
     <string name="specifications">Device specifications</string>
     <string name="set_parameters">Set parameters</string>
     <string name="empty_field">Field is empty!</string>
+
+    <string name="type_bracelet">Bracelet</string>
+    <string name="param_heart_rate_monitor">Heart rate monitor</string>
+    <string name="param_blood_pressure_monitor">Blood pressure monitor</string>
 
 </resources>
