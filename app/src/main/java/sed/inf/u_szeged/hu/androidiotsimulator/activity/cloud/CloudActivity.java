@@ -169,9 +169,6 @@ public class CloudActivity extends AppCompatActivity {
                 wrappers.add(CloudSettingsWrapper.fromSerial(cloudSerial));
             }
         } else {
-            // TODO REMOVE testBluemix
-            CloudSettingsWrapper testBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "testBluemix", "ahwgcy", false, 443, "mobiotsim", "empty", "empty", "cmd", "status");
-            wrappers.add(testBluemix);
             CloudSettingsWrapper demoBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX_DEMO);
             wrappers.add(demoBluemix);
             CloudSettingsWrapper myBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "myBluemix", "wg3go6", false, 1883, "mobiotsim", "empty", "empty", "cmd", "status");
