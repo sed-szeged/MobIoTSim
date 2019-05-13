@@ -195,9 +195,15 @@ public class Device implements Runnable, MqttCallback {
 
     public void stop(Context ctx) {
         isRunning = false;
-        if (traceFileLocation.equals("random")) {
-            //saveLog(ctx);
+        try{
+            if(client.isConnected())
+                client.disconnect();
+        } catch(MqttException e){
+            e.printStackTrace();
         }
+        /*if (traceFileLocation.equals("random")) {
+            //saveLog(ctx);
+        }*/
     }
 
 
@@ -213,8 +219,8 @@ public class Device implements Runnable, MqttCallback {
 
         //TODO SSL
         //https://console.bluemix.net/docs/services/IoT/reference/security/connect_devices_apps_gw.html#client_port_security
-        String broker_prefix = "tcp://";
-        String broker_suffix = ".messaging.internetofthings.ibmcloud.com:8883";
+        String broker_prefix = "ssl://";
+        String broker_suffix = ".messaging.internetofthings.ibmcloud.com:443";
         String broker = broker_prefix + organizationID + broker_suffix;
 
 
@@ -613,15 +619,11 @@ public class Device implements Runnable, MqttCallback {
                 return false;
             }
 
-            if (other.getTraceFileLocation() != traceFileLocation) {
+            if (!other.getTraceFileLocation().equals(traceFileLocation)) {
                 return false;
             }
 
-            if (other.isSaveTrace() != saveTrace) {
-                return false;
-            }
-
-            return true;
+            return other.isSaveTrace() == saveTrace;
         } else {
             return false;
         }

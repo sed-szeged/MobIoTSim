@@ -16,4 +16,11 @@
     <integer name="humidity_min">1</integer>
     <integer name="humidity_max">10</integer>
 
+
+    <integer name="heart_rate_monitor_min">60</integer>
+    <integer name="heart_rate_monitor_max">100</integer>
+
+    <integer name="blood_pressure_monitor_min">60</integer>
+    <integer name="blood_pressure_monitor_max">120</integer>
+
 </resources>

@@ -51,13 +51,13 @@ public class CloudActivity extends AppCompatActivity {
     }
 
     private void initializeButtons() {
-        ((FloatingActionButton) findViewById(R.id.new_cloud_fab)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.new_cloud_fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(CloudActivity.this);
                 builder.setTitle("Select a Cloud Type");
-                final String cloudTypes[] = {"Bluemix Quickstart demo", "Bluemix regular"};
+                final String[] cloudTypes = {"Bluemix Quickstart demo", "Bluemix regular"};
                 builder.setItems(cloudTypes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -90,7 +90,7 @@ public class CloudActivity extends AppCompatActivity {
             }
         });
 
-        ((Button) findViewById(R.id.edit_btn)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.edit_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(CloudActivity.this, CloudSettingsActivity.class);
@@ -138,10 +138,10 @@ public class CloudActivity extends AppCompatActivity {
             }
         });
 
-        ((Button) findViewById(R.id.delete_btn)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.delete_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Spinner spinner = (Spinner) findViewById(R.id.cloud_providers_spinner);
+                Spinner spinner = findViewById(R.id.cloud_providers_spinner);
                 String currentlySelected = MobIoTApplication.loadData(CloudSettingsActivity.KEY_NAME);
 
                 ArrayList<String> providers = createProvidersList();
@@ -205,7 +205,7 @@ public class CloudActivity extends AppCompatActivity {
 
 
     private void saveActualCloud() {
-        Spinner cloudSpinner = (Spinner) findViewById(R.id.cloud_providers_spinner);
+        Spinner cloudSpinner = findViewById(R.id.cloud_providers_spinner);
         int pos = cloudSpinner.getSelectedItemPosition();
         CloudSettingsWrapper cloudSettingsWrapper = cloudSettingsWrappers.get(pos);
 
@@ -250,7 +250,7 @@ public class CloudActivity extends AppCompatActivity {
 
         ArrayList<String> providers = createProvidersList();
 
-        Spinner spinner = (Spinner) findViewById(R.id.cloud_providers_spinner);
+        Spinner spinner = findViewById(R.id.cloud_providers_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, providers);
         // Specify the layout to use when the list of choices appears
@@ -350,7 +350,7 @@ public class CloudActivity extends AppCompatActivity {
         if (connectionType == null) {
             connectionType = "";
         }
-        Spinner connectionTypeSpinner = ((Spinner) findViewById(R.id.connection_type_spinner));
+        Spinner connectionTypeSpinner = findViewById(R.id.connection_type_spinner);
         connectionTypeSpinner.setEnabled(false);
         int count = connectionTypeSpinner.getCount();
         for (int i = 0; i < count; i++) {
@@ -364,7 +364,7 @@ public class CloudActivity extends AppCompatActivity {
 
 
     private void initConnectionTypeSpinner() {
-        Spinner spinner = (Spinner) findViewById(R.id.connection_type_spinner);
+        Spinner spinner = findViewById(R.id.connection_type_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.connection_types, android.R.layout.simple_spinner_item);

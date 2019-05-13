@@ -94,18 +94,12 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
     private static boolean isExternalStorageReadOnly() {
         String extStorageState = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState);
     }
 
     private static boolean isExternalStorageAvailable() {
         String extStorageState = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(extStorageState);
     }
 
     private void deleteParamter(int position) {
@@ -155,7 +149,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_settings);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -178,10 +172,10 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         res = getResources();
 
-        listView = (ExpandedListView) findViewById(R.id.list);
+        listView = findViewById(R.id.list);
         SensorDataWrapper sdw;
 
-        aSwitch = (Switch) findViewById(R.id.sw_random);
+        aSwitch = findViewById(R.id.sw_random);
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton cb, boolean on) {
@@ -249,7 +243,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 //        });
 
 
-        ((Button) findViewById(R.id.add_btn)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.add_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String paramName = res.getString(R.string.new_paramter_name);
@@ -269,7 +263,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 //            }
 //        });
 
-        ((Button) findViewById(R.id.trace_import_btn)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.trace_import_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showFileChooser();
@@ -282,9 +276,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 //        }
 
 
-        listView.setOnTouchListener(new View.OnTouchListener()
-
-                                    {
+        listView.setOnTouchListener(new View.OnTouchListener() {
                                         // Setting on Touch Listener for handling the touch inside ScrollView
                                         @Override
                                         public boolean onTouch(View v, MotionEvent event) {
@@ -357,7 +349,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     }
 
     private void initOrgIdSpinner(String defaultOrgId) {
-        Spinner spinner = (Spinner) findViewById(R.id.orgid_spinner);
+        Spinner spinner = findViewById(R.id.orgid_spinner);
         ArrayList<String> organizationIds = loadOrganizationIds();
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
@@ -384,7 +376,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     }
 
     private void initTypeSpinner(int selectedPos) {
-        Spinner spinner = (Spinner) findViewById(R.id.type_spinner);
+        Spinner spinner = findViewById(R.id.type_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
                 R.array.device_types, android.R.layout.simple_spinner_item);
@@ -399,7 +391,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                EditText freqET = (EditText) findViewById(R.id.freq_value_et);
+                EditText freqET = findViewById(R.id.freq_value_et);
 
                 switch (position) {
                     case 0:
@@ -549,12 +541,10 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     }
 
     private void initTypeIdSpinner(String type_id) {
-        Spinner spinner = (Spinner) findViewById(R.id.typeid_spinner);
+        Spinner spinner = findViewById(R.id.typeid_spinner);
         ArrayList<String> typeIds = deviceTypeIds;
 
-        if (typeIds.contains("Create new type...")) {
-            typeIds.remove("Create new type...");
-        }
+        typeIds.remove("Create new type...");
 
         typeIds.add("Create new type...");
         final int positionOfLast = typeIds.size() - 1;
@@ -593,7 +583,7 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DeviceSettingsActivity.this);
         alertDialogBuilder.setView(promptView);
 
-        final EditText editText = (EditText) promptView.findViewById(R.id._dialog_input_et);
+        final EditText editText = promptView.findViewById(R.id._dialog_input_et);
         // setup a dialog window
         alertDialogBuilder.setCancelable(false)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -639,17 +629,23 @@ public class DeviceSettingsActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... strings) {
-
-            jsonTypeIds = restTools.getDeviceTypes();
-
+            try {
+                jsonTypeIds = restTools.getDeviceTypes();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             deviceTypeIds = new ArrayList<>();
-            for (Result result : jsonTypeIds) {
-                deviceTypeIds.add(result.getId());
+            if (jsonTypeIds != null) {
+                for (Result result : jsonTypeIds) {
+                    deviceTypeIds.add(result.getId());
+                }
+            } else {
+                deviceTypeIds.add("MobIoTSimType");
             }
             initTypeIdSpinner(defaultTypeid);
         }

@@ -3,14 +3,12 @@ package sed.inf.u_szeged.hu.androidiotsimulator.activity.device;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -20,7 +18,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -32,9 +29,7 @@ import java.util.StringTokenizer;
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.DeviceGroupAdapter;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.Device;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.DeviceGroup;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
@@ -310,13 +305,13 @@ public class DevicesActivity extends AppCompatActivity {
 
     private void initButtons() {
 
-        ((FloatingActionButton) findViewById(R.id.new_device_fab)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.new_device_fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(DevicesActivity.this);
                 builder.setTitle("Select source");
-                final String cloudTypes[] = {"Create new device", "Import device template"};
+                final String[] cloudTypes = {"Create new device", "Import device template"};
                 builder.setItems(cloudTypes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -344,10 +339,7 @@ public class DevicesActivity extends AppCompatActivity {
         });
 
 
-
-
-
-        ((Button) findViewById(R.id.stop_all_btn)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.stop_all_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 for (DeviceGroup deviceGroup : deviceGroupList) {
@@ -357,7 +349,7 @@ public class DevicesActivity extends AppCompatActivity {
             }
         });
 
-        ((Button) findViewById(R.id.start_all_btn)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.start_all_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 for (DeviceGroup deviceGroup : deviceGroupList) {
@@ -369,7 +361,7 @@ public class DevicesActivity extends AppCompatActivity {
             }
         });
 
-        ((Button) findViewById(R.id.delete_all_btn)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.delete_all_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 for (DeviceGroup group : deviceGroupList) {
@@ -380,6 +372,24 @@ public class DevicesActivity extends AppCompatActivity {
                 saveDevicesToPrefs();
             }
         });
+    }
+
+    private class Param {
+        String paramName;
+        int min;
+        int max;
+
+        Param() {
+            paramName = "";
+            min = 0;
+            max = 0;
+        }
+
+        Param(String paramName, int min, int max) {
+            this.paramName = paramName;
+            this.min = min;
+            this.max = max;
+        }
     }
 
     private void createNewDeviceAction() {
@@ -405,12 +415,78 @@ public class DevicesActivity extends AppCompatActivity {
                 //TODO from resources
                 String type = "Custom";
                 double freq = 1;
+                /*
                 String paramName = "";
                 int min = 0;
                 int max = 0;
+                */
+                List<Param> param_container = new ArrayList<Param>();
                 Resources res = getResources();
 
                 switch (String.valueOf(sp.getSelectedItem())) {
+                    case "Bracelet":
+                        type = getString(R.string.type_bracelet);
+
+                        param_container.add(new Param(
+                                getString(R.string.param_heart_rate_monitor),
+                                res.getInteger(R.integer.heart_rate_monitor_min),
+                                res.getInteger(R.integer.heart_rate_monitor_max))
+                        );
+                        param_container.add(new Param(
+                                getString(R.string.param_blood_pressure_monitor),
+                                res.getInteger(R.integer.blood_pressure_monitor_min),
+                                res.getInteger(R.integer.blood_pressure_monitor_max))
+                        );
+                        break;
+                    case "Custom":
+                        type = getString(R.string.type_custom);
+                        param_container.add(new Param(
+                                getString(R.string.param_custom),
+                                res.getInteger(R.integer.custom_min),
+                                res.getInteger(R.integer.custom_max))
+                        );
+                        freq = res.getInteger(R.integer.custom_frequency);
+                        break;
+                    case "Thermostat":
+                        type = getString(R.string.type_thermostat);
+                        param_container.add(new Param(
+                                getString(R.string.param_temperature),
+                                res.getInteger(R.integer.temp_min),
+                                res.getInteger(R.integer.temp_max))
+                        );
+                        freq = res.getInteger(R.integer.temp_frequency);
+                        break;
+                    case "Temperature":
+                        type = getString(R.string.type_temperature);
+                        param_container.add(new Param(
+                                getString(R.string.param_temperature),
+                                res.getInteger(R.integer.temp_min),
+                                res.getInteger(R.integer.temp_max))
+                        );
+                        freq = res.getInteger(R.integer.temp_frequency);
+                        break;
+                    case "Humidity":
+                        type = getString(R.string.type_humidity);
+                        freq = res.getInteger(R.integer.humidity_frequency);
+                        param_container.add(new Param(
+                                getString(R.string.param_humidity),
+                                res.getInteger(R.integer.humidity_min),
+                                res.getInteger(R.integer.humidity_max))
+                        );
+                        break;
+                    case "Weathergroup":
+                        type = getString(R.string.type_custom);
+                        param_container.add(new Param(
+                                getString(R.string.param_custom),
+                                res.getInteger(R.integer.custom_min),
+                                res.getInteger(R.integer.custom_max))
+                        );
+                        freq = res.getInteger(R.integer.custom_frequency);
+                        break;
+                    default:
+                        param_container.add(new Param());
+                        break;
+                    /*
                     case "Custom":
                         type = getString(R.string.type_custom);
                         paramName = getString(R.string.param_custom);
@@ -446,12 +522,19 @@ public class DevicesActivity extends AppCompatActivity {
                         max = res.getInteger(R.integer.custom_max);
                         freq = res.getInteger(R.integer.custom_frequency);
                         break;
+                        */
                 }
 
 
                 bundle.putString(DeviceSettingsActivity.KEY_TYPE, type);
                 bundle.putString(DeviceSettingsActivity.KEY_FREQ, Double.toString(freq));
-                bundle.putString(DeviceSettingsActivity.KEY_SENSORS, paramName + "+" + min + "+" + max);
+                String sensorDataSerial = "";
+                for (Param p : param_container) {
+                    if (!sensorDataSerial.isEmpty()) sensorDataSerial += "*";
+                    sensorDataSerial += p.paramName + "+" + p.min + "+" + p.max;
+                }
+                bundle.putString(DeviceSettingsActivity.KEY_SENSORS, sensorDataSerial);
+                //bundle.putString(DeviceSettingsActivity.KEY_SENSORS, paramName + "+" + min + "+" + max);
                 bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, "random");
                 bundle.putString(DeviceSettingsActivity.KEY_NUM_OF_DEVICES, "1");
                 bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(true));
@@ -483,7 +566,7 @@ public class DevicesActivity extends AppCompatActivity {
     }
 
     public void initDevicesList() {
-        devicesLV = (ListView) findViewById(R.id.devices_lv);
+        devicesLV = findViewById(R.id.devices_lv);
         deviceGroupAdapter = new DeviceGroupAdapter(this, R.layout.device_item, deviceGroupList);
         devicesLV.setAdapter(deviceGroupAdapter);
         deviceGroupAdapter.notifyDataSetChanged();
