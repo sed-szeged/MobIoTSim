@@ -26,14 +26,14 @@ import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.devicetype.Result;
  * Created by tommy on 2/25/2017. Project name: MobIoTSim-mirrored
  *  
  */
-public class RESTTools {
+public class RESTTools_bluemix {
 
-    private String orgId;
-    private String username;
-    private String password;
-    private Context context;
+    protected String orgId;
+    protected String username;
+    protected String password;
+    protected Context context;
 
-    public RESTTools(String orgId, String username, String password, Context context) {
+    public RESTTools_bluemix(String orgId, String username, String password, Context context) {
         this.orgId = orgId;
         this.username = username;
         this.password = password;
@@ -70,7 +70,7 @@ public class RESTTools {
         return deviceTypes.getResults();
     }
 
-    private class GettingTask extends AsyncTask<String, String, String> {
+    protected class GettingTask extends AsyncTask<String, String, String> {
 
         String url;
         String username;
@@ -94,6 +94,7 @@ public class RESTTools {
                 String authEncoded = Base64.encodeToString(authStr.getBytes(), Base64.DEFAULT);
 
                 System.out.println("AuthEncoded: " + authEncoded);
+                System.out.println("URL: " + url);
 
                 HttpURLConnection connection
                         = (HttpURLConnection) new URL(url).openConnection();
@@ -134,7 +135,7 @@ public class RESTTools {
     }
 
 
-    private class PostingTask extends AsyncTask<String, String, Void> {
+    protected class PostingTask extends AsyncTask<String, String, Void> {
 
         String strJson;
         String url;
@@ -159,6 +160,7 @@ public class RESTTools {
                 String authEncoded = Base64.encodeToString(authStr.getBytes(), Base64.DEFAULT);
 
                 System.out.println("AuthEncoded: " + authEncoded);
+                System.out.println("URL: " + url);
                 System.out.println("JSON: " + strJson);
 
                 HttpURLConnection connection

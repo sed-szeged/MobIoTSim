@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 
 public class CloudSettingsActivity extends AppCompatActivity {
 
@@ -31,6 +33,11 @@ public class CloudSettingsActivity extends AppCompatActivity {
     public static final String KEY_COMMAND_ID = "COMMAND_ID";
     public static final String KEY_EDIT_IT = "EDIT_IT";
     public static final String KEY_CONNECTION_PROTOCOL = "CONNECTION_PROTOCOL";
+
+    public static final String KEY_PORT = "PORT_NUMBER";
+    public static final String KEY_BROKER_URL = "BROKER_URL";
+    public static final String KEY_BROKER_URL_PREFIX = "BROKER_URL_PREFIX";
+    public static final String KEY_BROKER_URL_HOST = "BROKER_URL_HOST";
 
     String editId;
 
@@ -86,6 +93,20 @@ public class CloudSettingsActivity extends AppCompatActivity {
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
+        ((Button) findViewById(R.id.generate_url)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String portNumStr = ((EditText) findViewById(R.id.show_url_et_port)).getText().toString();
+                if (portNumStr.isEmpty()) portNumStr = "0";
+                ((EditText) findViewById(R.id.show_url_et)).setText(CloudSettingsWrapper.createURL(
+                        ((EditText) findViewById(R.id.show_url_et_prefix)).getText().toString(),
+                        ((TextView) findViewById(R.id.type)).getText().toString(),
+                        ((EditText) findViewById(R.id.organization_id_et)).getText().toString(),
+                        ((EditText) findViewById(R.id.show_url_et_host)).getText().toString(),
+                        Integer.parseInt(portNumStr)
+                ));
+            }
+        });
     }
 
     private Bundle getData() {
@@ -100,6 +121,10 @@ public class CloudSettingsActivity extends AppCompatActivity {
         String commandId = ((EditText) findViewById(R.id.command_id_et)).getText().toString();
         String eventId = ((EditText) findViewById(R.id.event_id_et)).getText().toString();
         Spinner spinner = (Spinner) findViewById(R.id.connection_protocol_spinner);
+        int port = Integer.parseInt( ((EditText) findViewById(R.id.show_url_et_port)).getText().toString() );
+        String broker_scheme = ((EditText) findViewById(R.id.show_url_et_prefix)).getText().toString();
+        String broker_host = ((EditText) findViewById(R.id.show_url_et_host)).getText().toString();
+        String broker_url = ((EditText) findViewById(R.id.show_url_et)).getText().toString();
 
         bundle.putString(KEY_TYPE, type);
         bundle.putString(KEY_NAME, name);
@@ -111,6 +136,11 @@ public class CloudSettingsActivity extends AppCompatActivity {
         bundle.putString(KEY_COMMAND_ID, commandId);
         bundle.putString(KEY_EVENT_ID, eventId);
         bundle.putString(KEY_CONNECTION_PROTOCOL, spinner.getSelectedItem().toString());
+
+        bundle.putInt(KEY_PORT, port);
+        bundle.putString(KEY_BROKER_URL_PREFIX, broker_scheme);
+        bundle.putString(KEY_BROKER_URL_HOST, broker_host);
+        bundle.putString(KEY_BROKER_URL, broker_url);
 
         if (editId != null) {
             bundle.putString(KEY_EDIT_IT, editId);
@@ -135,49 +165,55 @@ public class CloudSettingsActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.organization_id_et)).setText(organizationId);
         }
 
-        if (type != null && !type.equals("BLUEMIX")) {
+        String appId = bundle.getString(KEY_APPLICATION_ID);
+        if (appId != null) {
+            ((EditText) findViewById(R.id.app_id_et)).setText(appId);
+        }
 
-            findViewById(R.id.app_id_et).setVisibility(View.GONE);
-            findViewById(R.id.token_et).setVisibility(View.GONE);
-            findViewById(R.id.key_et).setVisibility(View.GONE);
-            findViewById(R.id.command_id_et).setVisibility(View.GONE);
-            findViewById(R.id.event_id_et).setVisibility(View.GONE);
-            findViewById(R.id.connection_type_spinner).setVisibility(View.GONE);
+        String authToken = bundle.getString(KEY_AUTH_TOKEN);
+        if (authToken != null) {
+            ((EditText) findViewById(R.id.token_et)).setText(authToken);
+        }
 
-        } else {
-            String appId = bundle.getString(KEY_APPLICATION_ID);
-            if (appId != null) {
-                ((EditText) findViewById(R.id.app_id_et)).setText(appId);
-            }
+        String authKey = bundle.getString(KEY_AUTH_KEY);
+        if (authKey != null) {
+            ((EditText) findViewById(R.id.key_et)).setText(authKey);
+        }
 
-            String authToken = bundle.getString(KEY_AUTH_TOKEN);
-            if (authToken != null) {
-                ((EditText) findViewById(R.id.token_et)).setText(authToken);
-            }
+        String commandId = bundle.getString(KEY_COMMAND_ID);
+        if (commandId != null) {
+            ((EditText) findViewById(R.id.command_id_et)).setText(commandId);
+        }
 
-            String authKey = bundle.getString(KEY_AUTH_KEY);
-            if (authKey != null) {
-                ((EditText) findViewById(R.id.key_et)).setText(authKey);
-            }
+        String eventId = bundle.getString(KEY_EVENT_ID);
+        if (eventId != null) {
+            ((EditText) findViewById(R.id.event_id_et)).setText(eventId);
+        }
 
-            String commandId = bundle.getString(KEY_COMMAND_ID);
-            if (commandId != null) {
-                ((EditText) findViewById(R.id.command_id_et)).setText(commandId);
-            }
+        String connectionType = bundle.getString(KEY_CONNECTION_PROTOCOL);
+        if (connectionType != null) {
+            List<String> connectionTypeItems = Arrays.asList(getResources().getStringArray(R.array.connection_types));
+            int position = connectionTypeItems.indexOf(connectionType);
+            ((Spinner) findViewById(R.id.connection_protocol_spinner)).setSelection(position);
 
-            String eventId = bundle.getString(KEY_EVENT_ID);
-            if (eventId != null) {
-                ((EditText) findViewById(R.id.event_id_et)).setText(eventId);
-            }
+        }
 
-            String connectionType = bundle.getString(KEY_CONNECTION_PROTOCOL);
-            if (connectionType != null) {
-                List<String> connectionTypeItems = Arrays.asList(getResources().getStringArray(R.array.connection_types));
-                int position = connectionTypeItems.indexOf(connectionType);
-                ((Spinner) findViewById(R.id.connection_protocol_spinner)).setSelection(position);
+        String portNumber = "" + bundle.getInt(KEY_PORT);
+        ((EditText) findViewById(R.id.show_url_et_port)).setText(portNumber);
 
-            }
+        String broker_url_prefix = bundle.getString(KEY_BROKER_URL_PREFIX);
+        if (broker_url_prefix != null) {
+            ((EditText) findViewById(R.id.show_url_et_prefix)).setText(broker_url_prefix);
+        }
 
+        String broker_url_host = bundle.getString(KEY_BROKER_URL_HOST);
+        if (broker_url_host != null) {
+            ((EditText) findViewById(R.id.show_url_et_host)).setText(broker_url_host);
+        }
+
+        String broker_url_full = bundle.getString(KEY_BROKER_URL);
+        if (broker_url_full != null) {
+            ((EditText) findViewById(R.id.show_url_et)).setText(broker_url_full);
         }
 
     }
@@ -216,6 +252,26 @@ public class CloudSettingsActivity extends AppCompatActivity {
 
         if (((EditText) findViewById(R.id.event_id_et)).getText().toString().equals("")) {
             ((EditText) findViewById(R.id.event_id_et)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.show_url_et_port)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.show_url_et_port)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.show_url_et_prefix)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.show_url_et_prefix)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.show_url_et_host)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.show_url_et_host)).setError(getString(R.string.empty_field));
+            result = false;
+        }
+
+        if (((EditText) findViewById(R.id.show_url_et)).getText().toString().equals("")) {
+            ((EditText) findViewById(R.id.show_url_et)).setError(getString(R.string.empty_field));
             result = false;
         }
 

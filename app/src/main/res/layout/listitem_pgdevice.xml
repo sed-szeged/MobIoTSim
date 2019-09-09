@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:layout_marginRight="5dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    android:weightSum="2"
+    >
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/pgdevice_details_container_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/pgdeviceList_item_name">
+
+        <TextView
+            android:id="@+id/pgdeviceList_item_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:paddingLeft="15dp"
+            android:text="Name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large"/>
+
+        <TextView
+            android:id="@+id/pgdevice_productSerialNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:paddingLeft="15dp"
+            android:paddingRight="0dp"
+            android:text="@string/pgdevice_productSerial_caption"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/pgdevice_details_container_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/pgdeviceList_item_name">
+        <TextView
+            android:id="@+id/pgdevice_type"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:paddingLeft="30dp"
+            android:paddingRight="0dp"
+            android:text="type"
+            />
+        <TextView
+            android:id="@+id/pgdevice_attachedTo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:paddingLeft="30dp"
+            android:paddingRight="0dp"
+            android:text="@string/pgdevice_atteched_subject_caption"
+            />
+    </LinearLayout>
+
+</LinearLayout>

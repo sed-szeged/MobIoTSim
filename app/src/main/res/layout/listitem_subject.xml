@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:layout_marginRight="5dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    android:weightSum="2"
+    >
+
+    <TextView
+        android:id="@+id/subjectsList_item_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingLeft="15dp"
+        android:text="Name"
+        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large"/>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/subject_short_details_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/subjectsList_item_name">
+        <TextView
+            android:id="@+id/subject_quickInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:paddingLeft="30dp"
+            android:paddingRight="0dp"
+            android:text="quickinfo"
+            />
+        <TextView
+            android:id="@+id/subject_deviceCount"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:paddingLeft="30dp"
+            android:paddingRight="0dp"
+            android:text="@string/subjects_device_count_caption"
+            />
+    </LinearLayout>
+
+</LinearLayout>

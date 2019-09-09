@@ -48,6 +48,25 @@
         android:background="?android:attr/dividerVertical" />
 
     <Button
+        android:id="@+id/phenomenaGenerator_btn"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+        android:drawablePadding="16dp"
+        android:padding="20dp"
+        android:text="@string/phenomenaGenerator_btn"
+        android:textAlignment="textStart"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textSize="22sp" />
+
+    <View
+        android:id="@+id/tile_divider3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/dividerVertical" />
+
+    <Button
         android:id="@+id/informations_btn"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="match_parent"
@@ -61,7 +80,7 @@
         android:textSize="22sp" />
 
     <View
-        android:id="@+id/tile_divider3"
+        android:id="@+id/tile_divider4"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/dividerVertical" />

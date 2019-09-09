@@ -1,4 +1,78 @@
 <resources>
+    <!-- Strings related to Settings-->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_social_recommendations">Enable social recommendations</string>
+    <string name="pref_description_social_recommendations">Recommendations for people to contact
+        based on your message history
+    </string>
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!--Example settings for Data & Sync-->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value" />
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!--Example settings for Notifications-->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+    <string name="title_activity_populations_settings">Populations settings</string>
+    -->
+
     <string name="app_name">MobIoTSim - IoT Device Simulator</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_cloud_settings">Edit Cloud</string>
@@ -22,6 +96,7 @@
 
     <string-array name="device_types">
         <item>Custom</item>
+        <item>SimpleCGM</item>
         <item>Temperature</item>
         <item>Humidity</item>
         <item>Thermostat</item>
@@ -82,11 +157,13 @@
     <string name="new_paramter_name">empty</string>
     <string name="type_custom">Custom</string>
     <string name="param_custom">custom</string>
+    <string name="type_simplecgm">SimpleCGM</string>
     <string name="type_thermostat">Thermostat</string>
     <string name="type_temperature">Temperature</string>
     <string name="type_humidity">Humidity</string>
     <string name="param_temperature">temp</string>
     <string name="param_humidity">humidity</string>
+    <string name="param_simplecgm">glucose level</string>
     <string name="save_trace">Save trace</string>
     <string name="save_btn">Save</string>
     <string name="internet_error">No internet connection!</string>
@@ -97,5 +174,83 @@
     <string name="specifications">Device specifications</string>
     <string name="set_parameters">Set parameters</string>
     <string name="empty_field">Field is empty!</string>
+
+    //Phenomenon generator strings - HealthCare Simulation parameternames
+    <string name="PARAMETER_HAS_HYPERTONIA">Has hypertonia?</string>
+    //Phenomenon generator strings
+    <string name="phenomenaGenerator_btn">Phenomenon generator</string>
+    <string name="help_btn">Help</string>
+    <string name="title_activity_simulations">PhenGen - Simulations</string>
+    <string name="title_activity_simulation_settings">Simulation settings</string>
+    <string name="simulations_new_simulation_theme">Select theme</string>
+    <string name="simulation_name">Name</string>
+    <string name="simulation_default_name">New simulation</string>
+    <string name="simulation_generationFrequency">Frequency of generation (msec)</string>
+    <string name="simulation_timeAcceleration">Time acceleration (msec)</string>
+    <string name="simulation_simulated_datetime">Simulated actual date and time</string>
+    <string name="simulation_settings_must_be_filled">All of the settings must be filled</string>
+    <string name="theme_name">Theme</string>
+    <string name="title_activity_simulation_dash_board">Simulation Dashboard</string>
+    <string name="simulation_dashboard_generalSettings">General settings</string>
+    <string name="simulation_dashboard_populations">Populations</string>
+    <string name="simulation_dashboard_subjects">All subjects</string>
+    <string name="simulation_dashboard_devices">Devices</string>
+    <string name="simulation_dashboard_attachDevices">Attach devices to subjects</string>
+    <string name="simulation_dashboard_startStop_simulation_START">Start simulation (modelling)</string>
+    <string name="simulation_dashboard_startStop_simulation_STOP">Pause simulation (modelling)</string>
+    <string name="simulation_dashboard_startStop_devices_START">Start devices (data sending)</string>
+    <string name="simulation_dashboard_startStop_devices_STOP">Stop devices (data sending)</string>
+    <string name="simulation_dashboard_destroySimulation">Destroy simulation</string>
+    <string name="title_activity_populations">Populations</string>
+    <string name="population_size_caption">Subjects:</string>
+    <string name="title_activity_population_settings">Population settings</string>
+    <string name="population_btn_generate">Generate</string>
+    <string name="population_btn_jumpToSubjects">Subjects</string>
+    <string name="population_btn_delete">Delete</string>
+    <string name="population_settings_must_be_filled">All of the settings must be filled</string>
+    <string name="title_activity_subjects">Subjects</string>
+    <string name="subjects_no_population_filter">All subjects</string>
+    <string name="subjects_device_count_caption">Devices:</string>
+    <string name="title_activity_subject_settings">Subject settings</string>
+    <string name="subjects_settings">Settings</string>
+    <string name="title_activity_subject_information">Subject info</string>
+    <string name="broker_url_prefix">URL scheme:</string>
+    <string name="broker_url_host">URL host (name or IP):</string>
+    <string name="broker_url_port">Port:</string>
+    <string name="cloud_generate_url_btn">Generate URL</string>
+    <string name="title_activity_pgdevices">Devices</string>
+    <string name="pgdevice_atteched_subject_caption">Subject:</string>
+    <string name="pgdevice_settings_atteched_subject_caption">Attached to:</string>
+    <string name="pgdevice_productSerial_caption">Serial:</string>
+    <string name="pgdevice_attach_to_subject_btn_caption">(Re)attach</string>
+    <string name="pgdevice_unattach_btn_caption">Detach</string>
+    <string name="pgdevice_settings_deviceId">Device ID:</string>
+    <string name="pgdevice_settings_deviceGroup">Device group:</string>
+    <string name="pgdevice_settings_device_serial">Product serial:</string>
+    <string name="pgdevice_settings_outerType">Outer type:</string>
+    <string name="pgdevice_settings_innerType">Inner type:</string>
+    <string name="pgdevice_settings_manufacturer">Manufacturer:</string>
+    <string name="pgdevice_settings_productModel">Model:</string>
+    <string name="pgdevice_settings_sensorList">Sensors:</string>
+    <string name="pgdevice_settings_organizationID">Organization ID:</string>
+    <string name="pgdevice_settings_typeID">Type ID:</string>
+    <string name="pgdevice_settings_token">Password:</string>
+    <string name="pgdevice_settings_type">Type:</string>
+    <string name="pgdevice_settings_freq">Frequency:</string>
+    <string name="pgdevice_sensor_currentvalue_caption">Current value:</string>
+    <string name="title_activity_ppgdevice_settings">PhenGen Device settings</string>
+    <string name="pgdevice_settings_must_be_filled">Missing value</string>
+    <string name="pgdevice_settings_innerType_category">Category:</string>
+    <string name="pgdevice_new_device_type">Select type:</string>
+    <string name="pgdevices_attach_device_choose_subject_title">Choose a subject:</string>
+    <string name="pgdevices_attach_success_at_devices">subject(s) attached</string>
+    <string name="pgdevices_detach_success_at_devices">subject(s) detached</string>
+    <string name="simulation_dashboard_registrate_subjects">Registrate subjects</string>
+    <string name="simulation_dashboard_registrate_devices">Registrate devices</string>
+    <string name="rest_registration_device_not_available">REST API handler not avaiable</string>
+    <string name="rest_registration_subject_not_available">REST API handler not avaiable</string>
+    <string name="pgdevice_settings_onoff">Is turned on?</string>
+    <string name="pgdevice_remove_btn_caption">Delete</string>
+    <string name="subjects_remove">Delete</string>
 
 </resources>

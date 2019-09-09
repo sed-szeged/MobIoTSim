@@ -7,7 +7,13 @@
     android:fitsSystemWindows="true"
     tools:context=".activity.cloud.CloudActivity">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <include layout="@layout/content_cloud" />
+
+    </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/new_cloud_fab"

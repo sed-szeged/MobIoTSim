@@ -14,6 +14,8 @@ import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.phenomena.simulation.SimulationsActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.phenGenerator.general.PhenGenMain;
 
 public class IoTSimulatorActivity extends AppCompatActivity {
 
@@ -21,6 +23,7 @@ public class IoTSimulatorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_iot_simulator);
+        MobIoTApplication.saveData(MobIoTApplication.KEY_DEVICES, "");//TODO: temporary
 
         MobIoTApplication.setActivity(this);
         checkInternetConnection();
@@ -38,6 +41,14 @@ public class IoTSimulatorActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(IoTSimulatorActivity.this, DevicesActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        findViewById(R.id.phenomenaGenerator_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(IoTSimulatorActivity.this, SimulationsActivity.class);
                 startActivity(intent);
             }
         });

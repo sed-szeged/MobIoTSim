@@ -418,6 +418,13 @@ public class DevicesActivity extends AppCompatActivity {
                         max = res.getInteger(R.integer.custom_max);
                         freq = res.getInteger(R.integer.custom_frequency);
                         break;
+                    case "SimpleCGM":
+                        type = getString(R.string.type_simplecgm);
+                        paramName = getString(R.string.param_simplecgm);
+                        min = res.getInteger(R.integer.simplecgm_min);
+                        max = res.getInteger(R.integer.simplecgm_max);
+                        freq = res.getInteger(R.integer.simplecgm_frequency);
+                        break;
                     case "Thermostat":
                         type = getString(R.string.type_thermostat);
                         paramName = getString(R.string.param_temperature);
@@ -480,6 +487,7 @@ public class DevicesActivity extends AppCompatActivity {
             sb.append(d.getSerial());
         }
         MobIoTApplication.saveData(MobIoTApplication.KEY_DEVICES, sb.toString());
+        System.out.println("SAVE DEVICES: " + sb.toString());
     }
 
     public void initDevicesList() {

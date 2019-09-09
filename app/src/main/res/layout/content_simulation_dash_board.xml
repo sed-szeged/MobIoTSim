@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".activity.phenomena.simulation.SimulationDashBoardActivity"
+    tools:showIn="@layout/activity_simulation_dash_board">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/simulation_name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingLeft="15dp"
+            android:text="Name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large"/>
+        <TextView
+            android:id="@+id/simulation_theme"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingLeft="15dp"
+            android:text="Theme"
+            />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/simulation_generalSettings"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_generalSettings"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_populations"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_populations"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_subjects"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_subjects"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_devices"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_devices"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_attachDevices"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_attachDevices"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider5"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_registrate_subjects"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_registrate_subjects"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider5a"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_registrate_devices"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_registrate_devices"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider5b"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_startStop_simulation"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_startStop_simulation_START"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider6"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_startStop_devices"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_startStop_devices_START"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider7"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/simulation_destroySimulation"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_info_outline_black_24dp"
+                android:drawablePadding="16dp"
+                android:padding="20dp"
+                android:text="@string/simulation_dashboard_destroySimulation"
+                android:textAlignment="textStart"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="22sp" />
+
+            <View
+                android:id="@+id/tile_divider8"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

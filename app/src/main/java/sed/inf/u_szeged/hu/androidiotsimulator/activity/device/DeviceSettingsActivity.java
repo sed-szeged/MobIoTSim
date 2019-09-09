@@ -43,7 +43,7 @@ import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.adapter.ParameterAdapter;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
-import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools;
+import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools_bluemix;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorData;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorDataWrapper;
@@ -90,7 +90,8 @@ public class DeviceSettingsActivity extends AppCompatActivity {
     Switch aSwitch;
     Resources res;
     ArrayList<String> deviceTypeIds;
-    RESTTools restTools;
+    RESTTools_bluemix restTools;
+    CloudSettingsWrapper.CSType cloudType;
 
     private static boolean isExternalStorageReadOnly() {
         String extStorageState = Environment.getExternalStorageState();
@@ -171,8 +172,10 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         String auth_key = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_KEY);
         String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
         String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
+        cloudType = CloudSettingsWrapper.CSType.valueOf(
+                MobIoTApplication.loadData(CloudSettingsActivity.KEY_TYPE) );
 
-        restTools = new RESTTools(orgId, auth_key, auth_token, getApplicationContext());
+        if (cloudType.usesRESTTools()) restTools = new RESTTools_bluemix(orgId, auth_key, auth_token, getApplicationContext());
 
         MobIoTApplication.setActivity(this);
 
@@ -601,7 +604,9 @@ public class DeviceSettingsActivity extends AppCompatActivity {
                         String newType = String.valueOf(editText.getText());
                         deviceTypeIds.add(newType);
                         initTypeIdSpinner(newType);
-                        restTools.addDeviceType("{ \"id\" : \"" + newType + "\" }");
+                        if (cloudType.usesRESTTools()) {
+                            restTools.addDeviceType("{ \"id\" : \"" + newType + "\" }");
+                        }
 
                     }
                 })
@@ -640,7 +645,15 @@ public class DeviceSettingsActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
 
-            jsonTypeIds = restTools.getDeviceTypes();
+            if (cloudType.usesRESTTools()) {
+                jsonTypeIds = restTools.getDeviceTypes();
+            } else {
+                //Default types
+                Result result = new Result();
+                result.setId("MobIoTSimType");
+                jsonTypeIds = new ArrayList<>();
+                jsonTypeIds.add(result);
+            }
 
             return null;
         }

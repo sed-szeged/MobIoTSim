@@ -204,19 +204,41 @@
             android:id="@+id/show_url_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/full_url" />
 
-            <TextView
+            <EditText
                 android:id="@+id/show_url_et"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:enabled="false"
                 android:text="@string/template_url" />
+
+            <TextView
+                android:id="@+id/show_url_et_port"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:visibility="gone"
+                android:text="" />
+            <TextView
+                android:id="@+id/show_url_et_prefix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:visibility="gone"
+                android:text="" />
+            <TextView
+                android:id="@+id/show_url_et_host"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:visibility="gone"
+                android:text="" />
         </LinearLayout>
 
         <RelativeLayout

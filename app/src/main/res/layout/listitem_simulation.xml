@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:layout_marginRight="5dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    android:weightSum="2"
+    >
+
+    <TextView
+        android:id="@+id/simulationList_item_name"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:paddingLeft="15dp"
+        android:text="Name"
+        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large"/>
+    <TextView
+        android:id="@+id/simulationList_item_theme"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:paddingLeft="30dp"
+        android:text="Theme"
+        />
+</LinearLayout>

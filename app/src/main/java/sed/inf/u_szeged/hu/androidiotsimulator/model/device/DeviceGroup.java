@@ -16,7 +16,8 @@ import java.util.Objects;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
-import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools;
+import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools_bluemix;
+import sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings.CloudSettingsWrapper;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.openweather.OpenweatherTrace;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.FinishedTrace;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.TraceGroup;
@@ -64,7 +65,10 @@ public class DeviceGroup {
             devicesList.add(newDevice);
         }
 
-        saveToCloud();
+        if (CloudSettingsWrapper.CSType.valueOf(
+                MobIoTApplication.loadData(CloudSettingsActivity.KEY_TYPE)).usesRESTTools()) {
+            saveToCloud();
+        }
     }
 
 
@@ -93,7 +97,8 @@ public class DeviceGroup {
             finishedTraceList.add(d.getClog());
         }
 
-        if (baseDevice.getTraceFileLocation().equals("random") && baseDevice.isSaveTrace()) {
+        if (baseDevice.getTraceFileLocation().equals("random")
+                && baseDevice.isSaveTrace()) {
             finishedTraceList.setCnt(finishedTraceList.getTraceGroup().get(0).getCycles().size());
             finishedTraceList.setType(GENERIC_DEVICE_TRACE);
             saveTraceToJson(ctx);
@@ -126,7 +131,7 @@ public class DeviceGroup {
         String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
         String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
 
-        RESTTools restTools = new RESTTools(orgId, auth_key, auth_token, context);
+        RESTTools_bluemix restTools = new RESTTools_bluemix(orgId, auth_key, auth_token, context);
         restTools.addDevices(finalJson);
     }
 
@@ -164,7 +169,7 @@ public class DeviceGroup {
         String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
         String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
 
-        RESTTools restTools = new RESTTools(orgId, auth_key, auth_token, context);
+        RESTTools_bluemix restTools = new RESTTools_bluemix(orgId, auth_key, auth_token, context);
         restTools.removeDevice(finalJson);
     }
 

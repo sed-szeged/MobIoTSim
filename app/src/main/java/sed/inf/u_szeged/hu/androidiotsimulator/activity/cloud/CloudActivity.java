@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -57,20 +58,36 @@ public class CloudActivity extends AppCompatActivity {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(CloudActivity.this);
                 builder.setTitle("Select a Cloud Type");
-                final String cloudTypes[] = {"Bluemix Quickstart demo", "Bluemix regular"};
+                final ArrayList<String> cloudTypeList = new ArrayList<>();
+                for (CloudSettingsWrapper.CSType type : CloudSettingsWrapper.CSType.values()) {
+                    cloudTypeList.add(type.toString());
+                }
+                final String[] cloudTypes = cloudTypeList.toArray(new String[0]);
                 builder.setItems(cloudTypes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(CloudActivity.this, CloudSettingsActivity.class);
                         Bundle bundle = new Bundle();
 
-                        switch (which) {
-                            case 0:
+                        switch (cloudTypes[which]) {
+                            case "BLUEMIX_DEMO":
                                 bundle.putString(CloudSettingsActivity.KEY_TYPE, CloudSettingsWrapper.CSType.BLUEMIX_DEMO.toString());
                                 bundle.putString(CloudSettingsActivity.KEY_ORGANIZATION_ID, "quickstart");
                                 break;
-                            case 1:
-                                bundle.putString(CloudSettingsActivity.KEY_TYPE, CloudSettingsWrapper.CSType.BLUEMIX.toString());
+                            default:
+                                String cstypeStr = cloudTypes[which];
+                                boolean isSecure = cstypeStr.equals(CloudSettingsWrapper.CSType.BLUEMIX.toString())
+                                        ? true : false;
+                                int defaultPort = CloudSettingsWrapper.createPortNumber(cstypeStr, isSecure);
+                                String defaultPrefix = CloudSettingsWrapper.createPrefix(cstypeStr, isSecure);
+                                String defaultHost = CloudSettingsWrapper.createHost(cstypeStr);
+                                String defaultURL = CloudSettingsWrapper.createURL(defaultPrefix, cstypeStr,
+                                        "?", defaultHost, defaultPort);
+                                bundle.putString(CloudSettingsActivity.KEY_TYPE, cstypeStr);
+                                bundle.putInt(CloudSettingsActivity.KEY_PORT, defaultPort);
+                                bundle.putString(CloudSettingsActivity.KEY_BROKER_URL_PREFIX, defaultPrefix);
+                                bundle.putString(CloudSettingsActivity.KEY_BROKER_URL_HOST, defaultHost);
+                                bundle.putString(CloudSettingsActivity.KEY_BROKER_URL, defaultURL);
                                 break;
                         }
 
@@ -112,6 +129,9 @@ public class CloudActivity extends AppCompatActivity {
                     bundle.putString(CloudSettingsActivity.KEY_ORGANIZATION_ID,
                             cloudSettingsWrappers.get(position).getOrganizationID());
 
+                    bundle.putInt(CloudSettingsActivity.KEY_PORT,
+                            cloudSettingsWrappers.get(position).getPort());
+
                     bundle.putString(CloudSettingsActivity.KEY_APPLICATION_ID,
                             cloudSettingsWrappers.get(position).getApplicationID());
 
@@ -126,6 +146,15 @@ public class CloudActivity extends AppCompatActivity {
 
                     bundle.putString(CloudSettingsActivity.KEY_EVENT_ID,
                             cloudSettingsWrappers.get(position).getEventID());
+
+                    bundle.putString(CloudSettingsActivity.KEY_BROKER_URL,
+                            cloudSettingsWrappers.get(position).getBrokerUrl());
+
+                    bundle.putString(CloudSettingsActivity.KEY_BROKER_URL_PREFIX,
+                            cloudSettingsWrappers.get(position).getBrokerUrlPrefix());
+
+                    bundle.putString(CloudSettingsActivity.KEY_BROKER_URL_HOST,
+                            cloudSettingsWrappers.get(position).getBrokerUrlHost());
                 }
 
                 bundle.putString(CloudSettingsActivity.KEY_NAME,
@@ -169,10 +198,37 @@ public class CloudActivity extends AppCompatActivity {
                 wrappers.add(CloudSettingsWrapper.fromSerial(cloudSerial));
             }
         } else {
-            CloudSettingsWrapper demoBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX_DEMO);
+            CloudSettingsWrapper demoBluemix =
+                    new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX_DEMO);
             wrappers.add(demoBluemix);
-            CloudSettingsWrapper myBluemix = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "myBluemix", "wg3go6", false, 1883, "mobiotsim", "empty", "empty", "cmd", "status");
+            CloudSettingsWrapper myBluemix =
+                    new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "myBluemix",
+                            "wg3go6",false, 1883, "mobiotsim",
+                            "empty", "empty", "cmd", "status",
+                            "", "", "");
             wrappers.add(myBluemix);
+            CloudSettingsWrapper teszt02 =
+                    new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "Teszt02",
+                            "6dr2qf", false, 443,
+                            "mobiotsimApp","a-6dr2qf-r5suhuzvwc", "M?52f?S0KBy(ghdFyo",
+                            "cmd", "status",
+                            "ssl://6dr2qf.messaging. Internetofthings.ibmcloud.com:443",
+                            "","");
+            wrappers.add(teszt02);
+            CloudSettingsWrapper teszt03 =
+                    new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX, "Teszt03",
+                            "6dr2qf", false, 443, "mobiotsimApp",
+                            "a-6dr2qf-o9sr2vyns5", "JAn*zY7&Vb-jJTILAT",
+                            "cmd", "status",
+                            "","","");
+            wrappers.add(teszt03);
+            CloudSettingsWrapper edgeGW =
+                    new CloudSettingsWrapper(CloudSettingsWrapper.CSType.EDGE_GATEWAY, "EdgeGateway",
+                            "x", false, 1883, "mobiotsimApp",
+                            "x", "x", "x", "x",
+                            "","","192.168.0.13");
+            wrappers.add(edgeGW);
+
         }
 
         return wrappers;
@@ -198,6 +254,18 @@ public class CloudActivity extends AppCompatActivity {
         String eventId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_EVENT_ID);
         ((EditText) findViewById(R.id.event_id_et)).setText(eventId);
 
+        String brokerURL = MobIoTApplication.loadData(CloudSettingsActivity.KEY_BROKER_URL);
+        ((EditText) findViewById(R.id.show_url_et)).setText(brokerURL);
+
+        String brokerURL_port = MobIoTApplication.loadData(CloudSettingsActivity.KEY_PORT);
+        ((TextView) findViewById(R.id.show_url_et_port)).setText(brokerURL_port);
+
+        String brokerURL_prefix = MobIoTApplication.loadData(CloudSettingsActivity.KEY_BROKER_URL_PREFIX);
+        ((TextView) findViewById(R.id.show_url_et_prefix)).setText(brokerURL_prefix);
+
+        String brokerURL_host = MobIoTApplication.loadData(CloudSettingsActivity.KEY_BROKER_URL_HOST);
+        ((TextView) findViewById(R.id.show_url_et_host)).setText(brokerURL_host);
+
         String connectionType = MobIoTApplication.loadData(CloudSettingsActivity.KEY_CONNECTION_TYPE);
 
         setConnectionTypeSpinner(connectionType);
@@ -221,7 +289,7 @@ public class CloudActivity extends AppCompatActivity {
 
             MobIoTApplication.saveData(CloudSettingsActivity.KEY_CONNECTION_TYPE, Boolean.toString(true));
 
-        } else if (cloudSettingsWrapper.getType() == CloudSettingsWrapper.CSType.BLUEMIX) {
+        } else {
             String organizationID = ((EditText) findViewById(R.id.organization_id_et)).getText().toString();
             MobIoTApplication.saveData(CloudSettingsActivity.KEY_ORGANIZATION_ID, organizationID);
 
@@ -240,9 +308,23 @@ public class CloudActivity extends AppCompatActivity {
             String eventId = ((EditText) findViewById(R.id.event_id_et)).getText().toString();
             MobIoTApplication.saveData(CloudSettingsActivity.KEY_EVENT_ID, eventId);
 
+            String brokerURL = ((EditText) findViewById(R.id.show_url_et)).getText().toString();
+            MobIoTApplication.saveData(CloudSettingsActivity.KEY_BROKER_URL, brokerURL);
+
+            String brokerURL_port = ((TextView) findViewById(R.id.show_url_et_port)).getText().toString();
+            MobIoTApplication.saveData(CloudSettingsActivity.KEY_PORT, brokerURL_port);
+
+            String brokerURL_prefix = ((TextView) findViewById(R.id.show_url_et_prefix)).getText().toString();
+            MobIoTApplication.saveData(CloudSettingsActivity.KEY_BROKER_URL_PREFIX, brokerURL_prefix);
+
+            String brokerURL_host = ((TextView) findViewById(R.id.show_url_et_host)).getText().toString();
+            MobIoTApplication.saveData(CloudSettingsActivity.KEY_BROKER_URL_HOST, brokerURL_host);
+
+
             String connectionType = ((Spinner) findViewById(R.id.connection_type_spinner)).getSelectedItem().toString();
             MobIoTApplication.saveData(CloudSettingsActivity.KEY_CONNECTION_TYPE, connectionType);
         }
+        System.out.println("Cloud has been saved to shared preferences.");
     }
 
 
@@ -314,13 +396,26 @@ public class CloudActivity extends AppCompatActivity {
                     (findViewById(R.id.event_id_container)).setVisibility(View.VISIBLE);
                     ((EditText) findViewById(R.id.event_id_et)).setText(eventId);
 
+                    String brokerUrl = cloudSettingsWrapper.getBrokerUrl();
+                    (findViewById(R.id.show_url_et)).setVisibility(View.VISIBLE);
+                    ((EditText) findViewById(R.id.show_url_et)).setText(brokerUrl);
+
+                    int brokerUrl_port = cloudSettingsWrapper.getPort();
+                    ((TextView) findViewById(R.id.show_url_et_port)).setText("" + brokerUrl_port);
+
+                    String brokerUrl_prefix = cloudSettingsWrapper.getBrokerUrlPrefix();
+                    ((TextView) findViewById(R.id.show_url_et_prefix)).setText(brokerUrl_prefix);
+
+                    String brokerUrl_host = cloudSettingsWrapper.getBrokerUrlHost();
+                    ((TextView) findViewById(R.id.show_url_et_host)).setText(brokerUrl_host);
+
                     String connectionType = "true";
 
                     setConnectionTypeSpinner(connectionType);
                 }
 
                 // TODO something with this thing
-                MobIoTApplication.saveData(MobIoTApplication.KEY_DEVICES, "");
+                //MobIoTApplication.saveData(MobIoTApplication.KEY_DEVICES, "");
 
                 saveActualCloud();
             }
@@ -351,7 +446,7 @@ public class CloudActivity extends AppCompatActivity {
             connectionType = "";
         }
         Spinner connectionTypeSpinner = ((Spinner) findViewById(R.id.connection_type_spinner));
-        connectionTypeSpinner.setEnabled(false);
+        connectionTypeSpinner.setEnabled(true);
         int count = connectionTypeSpinner.getCount();
         for (int i = 0; i < count; i++) {
             String itemStr = connectionTypeSpinner.getItemAtPosition(i).toString();
