@@ -17,11 +17,6 @@ import sed.inf.u_szeged.hu.androidiotsimulator.R;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DeviceSettingsActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.device.SensorData;
 
-/**
- * Created by tommy on 11/13/2016. Project name: MobIoTSim-mirrored
- *  
- */
-
 public class ParameterAdapter extends ArrayAdapter<SensorData> implements View.OnClickListener {
 
     private List<SensorData> dataSet;

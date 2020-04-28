@@ -1,9 +1,13 @@
 <resources>
     <string name="app_name">MobIoTSim - IoT Device Simulator</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_cloud_settings">Edit Cloud</string>
+    <string name="title_activity_cloud_settings_add">Add Cloud</string>
     <string name="title_activity_cloud">Cloud Settings</string>
-
+    <string name="title_activity_device_settings_add">Add Device</string>
+    <string name="title_activity_device_settings_edit">Edit Device</string>
 
     <string name="title">MobIoTSim - IoT Device Simulator</string>
 
@@ -29,6 +33,7 @@
     </string-array>
 
     <string name="title_activity_devices">  Devices</string>
+    <string name="title_activity_chart"> Chart</string>
     <string name="title_activity_device_settings">Edit Device</string>
     <string name="title_activity_information">Information</string>
     <string name="information">Information</string>
@@ -39,6 +44,8 @@
     <string name="application_id">Application ID:</string>
     <string name="auth_key">Auth key:</string>
     <string name="auth_token">Auth token:</string>
+    <string name="password">Password:</string>
+    <string name="topics">Topics:</string>
     <string name="command_id">Command ID:</string>
     <string name="event_id">Event ID:</string>
     <string name="connection_type">Connection type:</string>
@@ -56,6 +63,7 @@
     <string name="add_new_device_btn">Add new device</string>
     <string name="start_all_btn">Start all</string>
     <string name="stop_all_btn">Stop all</string>
+    <string name="add_parameter_btn">Add parameter</string>
     <string name="import_devices_btn">Import devices</string>
     <string name="export_devices_btn">Export devices</string>
     <string name="warning_icon">Warning icon</string>
@@ -66,6 +74,7 @@
     <string name="add_btn">Add parameter</string>
     <string name="export_btn">Export</string>
     <string name="cloud_settings_btn">Cloud settings</string>
+    <string name="cloud">Cloud </string>
     <string name="devices_btn">Devices</string>
     <string name="information_btn">Information</string>
     <string name="device_id_alt">Device ID</string>
@@ -76,6 +85,9 @@
     <string name="generate_random_data">Generate random data</string>
     <string name="import_trace">Import trace</string>
     <string name="token_hint">Min 8 chars</string>
+    <string name="device_id_hint">Min 4 chars</string>
+    <string name="password_hint">Min 8 chars</string>
+    <string name="topics_hint">Press here to generate default topic</string>
     <string name="numofdevices">Number of devices: </string>
     <string name="subdevices">Subdevices:</string>
     <string name="stop_btn">Stop</string>
@@ -97,5 +109,11 @@
     <string name="specifications">Device specifications</string>
     <string name="set_parameters">Set parameters</string>
     <string name="empty_field">Field is empty!</string>
-
+    <string name="delete_this_cloud_dialog_msg">Delete this cloud?</string>
+    <string name="delete_all_devices">Delete all devices?</string>
+    <string name="start_all_devices">Start all</string>
+    <string name="stop_all_devices">Stop all</string>
+    <string name="no_device_nothing_to_start">No device group: nothing to start</string>
+    <string name="select_device_type">Select device type</string>
+    <string name="chart_description">Data sent to cloud</string>
 </resources>

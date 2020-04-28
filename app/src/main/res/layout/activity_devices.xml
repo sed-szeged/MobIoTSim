@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".activity.device.DevicesActivity">
+    tools:context="sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesFragment">
 
     <include layout="@layout/content_devices" />
 
-    <android.support.design.widget.FloatingActionButton
+<!-- Removed from devices
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/new_device_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_add_white_24dp" />
-
-</android.support.design.widget.CoordinatorLayout>
+-->
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

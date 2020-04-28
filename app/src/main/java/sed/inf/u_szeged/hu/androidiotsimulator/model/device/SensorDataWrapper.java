@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-/**
- * Created by tommy on 11/13/2016. Project name: MobIoTSim-mirrored
- *  
- */
-
 public class SensorDataWrapper {
 
 

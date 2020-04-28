@@ -11,11 +11,6 @@ import java.util.List;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.Parameter;
 
-/**
- * Created by tommy on 8/7/2017. Project name: MobIoTSim-mirrored
- *  
- */
-
 class FileStreamHandler {
 
     private static FileStreamHandler instance;
@@ -112,3 +107,4 @@ class FileStreamHandler {
         return cnt;
     }
 }
+

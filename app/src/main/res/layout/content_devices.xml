@@ -8,12 +8,13 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:id="@+id/content_devices_layout"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".activity.device.DevicesActivity"
+    tools:context="sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesFragment"
     tools:showIn="@layout/activity_devices">
 
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    <LinearLayout
         android:id="@+id/controlls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,47 +32,29 @@
         <View
             android:layout_width="1dp"
             android:layout_height="50dp" />
+    </LinearLayout>
+-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
 
-        <ImageView
-            android:id="@+id/warning"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="5dp"
-            android:contentDescription="@string/warning_icon"
-            android:src="@drawable/red_warning"
-            android:visibility="gone" />
+        android:orientation="vertical">
 
+        <ListView
+            android:id="@+id/devices_lv"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
 
         <Button
             android:id="@+id/start_all_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="@string/start_all_btn" />
-
-        <Button
-            android:id="@+id/stop_all_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="@string/stop_all_btn" />
-
-
-        <Button
-            android:id="@+id/delete_all_btn"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="5dp"
-            android:background="@android:drawable/ic_delete" />
-
+            android:layout_width="match_parent"
+            android:textColor="@color/colorWhite"
+            android:layout_height="50dp"
+            android:layout_weight="0"
+            android:background="@drawable/btn_custom"
+            android:text="@string/start_all_btn"
+            android:textAllCaps="false"
+            android:visibility="visible" />
     </LinearLayout>
-
-
-    <ListView
-        android:id="@+id/devices_lv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/controlls" />
-
-
 </RelativeLayout>

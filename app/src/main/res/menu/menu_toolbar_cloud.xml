@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/ic_edit_cloud"
+        android:icon="@drawable/ic_edit_cloud"
+        android:title="Edit Cloud"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/ic_delete_cloud"
+        android:icon="@drawable/ic_delete_cloud"
+        android:title="Delete Cloud"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/ic_cloud_type_bluemix_demo"
+        android:title="Bluemix Quickstart Demo"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/ic_cloud_type_bluemix_regular"
+        android:title="Bluemix Regular"
+        app:showAsAction="never" />
+</menu>

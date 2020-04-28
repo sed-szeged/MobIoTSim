@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".activity.main.IoTSimulatorActivity"
+    tools:context="sed.inf.u_szeged.hu.androidiotsimulator.activity.main.IoTSimulatorActivity"
     tools:showIn="@layout/activity_iot_simulator">
 
     <Button

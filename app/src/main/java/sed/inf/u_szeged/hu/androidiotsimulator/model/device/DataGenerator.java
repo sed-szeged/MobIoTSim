@@ -1,7 +1,6 @@
 package sed.inf.u_szeged.hu.androidiotsimulator.model.device;
 
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Pflanzner on 2017. 03. 15..
@@ -33,9 +32,9 @@ public class DataGenerator {
     static Random random = new Random();
 
     enum MSG_TYPE { SIMPLE_STATIC, SIMPLE_RANDOM, SIMPLE_RANDOM_LIMIT, SIMPLE_RANDOM_STEP,
-                    MULTI_STATIC, MULTI_RANDOM_STEP, MULTI_RANDOM_LIMIT,
-                    WEATHER_RANDOM, WEATHER_RANDOM_STEP, WEATHER_IDX, WEATHER_IDX_STEP,
-                    WEATHER_GROUP_RANDOM, WEATHER_GROUP_RANDOM_STEP};
+        MULTI_STATIC, MULTI_RANDOM_STEP, MULTI_RANDOM_LIMIT,
+        WEATHER_RANDOM, WEATHER_RANDOM_STEP, WEATHER_IDX, WEATHER_IDX_STEP,
+        WEATHER_GROUP_RANDOM, WEATHER_GROUP_RANDOM_STEP};
 
     public static String getNextMsg(MSG_TYPE msgType){
         String msg;
@@ -57,7 +56,7 @@ public class DataGenerator {
             case WEATHER_GROUP_RANDOM_STEP: msg = getNextWeatherGroupRandomMsgWithRandomStep(); break;
 
             default:
-               // MyLog.e("Unknown message type");
+                // MyLog.e("Unknown message type");
                 return getNextSimpleStaticMsg();
         }
         return msg;

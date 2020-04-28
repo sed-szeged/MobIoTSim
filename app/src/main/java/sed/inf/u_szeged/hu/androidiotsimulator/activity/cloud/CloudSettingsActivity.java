@@ -3,8 +3,6 @@ package sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,6 +10,9 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +40,7 @@ public class CloudSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cloud_settings);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -59,23 +60,8 @@ public class CloudSettingsActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         editId = bundle.getString(KEY_EDIT_IT);
         setData(bundle);
-
-//        findViewById(R.id.ok_btn).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent();
-//                intent.putExtras(getData());
-//                setResult(Activity.RESULT_OK, intent);
-//                finish();
-//            }
-//        });
-//
-//        findViewById(R.id.cancel_btn).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                finish();
-//            }
-//        });
+        getSupportActionBar().setTitle(bundle.getString("title"));
+        //Toroltem innen egy eredetileg is kikommentezett reszt
 
         Spinner spinner = (Spinner) findViewById(R.id.connection_protocol_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -99,7 +85,7 @@ public class CloudSettingsActivity extends AppCompatActivity {
         String authtoken = ((EditText) findViewById(R.id.token_et)).getText().toString();
         String commandId = ((EditText) findViewById(R.id.command_id_et)).getText().toString();
         String eventId = ((EditText) findViewById(R.id.event_id_et)).getText().toString();
-        Spinner spinner = (Spinner) findViewById(R.id.connection_protocol_spinner);
+        Spinner spinner = findViewById(R.id.connection_protocol_spinner);
 
         bundle.putString(KEY_TYPE, type);
         bundle.putString(KEY_NAME, name);
@@ -135,51 +121,37 @@ public class CloudSettingsActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.organization_id_et)).setText(organizationId);
         }
 
-        if (type != null && !type.equals("BLUEMIX")) {
-
-            findViewById(R.id.app_id_et).setVisibility(View.GONE);
-            findViewById(R.id.token_et).setVisibility(View.GONE);
-            findViewById(R.id.key_et).setVisibility(View.GONE);
-            findViewById(R.id.command_id_et).setVisibility(View.GONE);
-            findViewById(R.id.event_id_et).setVisibility(View.GONE);
-            findViewById(R.id.connection_type_spinner).setVisibility(View.GONE);
-
-        } else {
-            String appId = bundle.getString(KEY_APPLICATION_ID);
-            if (appId != null) {
-                ((EditText) findViewById(R.id.app_id_et)).setText(appId);
-            }
-
-            String authToken = bundle.getString(KEY_AUTH_TOKEN);
-            if (authToken != null) {
-                ((EditText) findViewById(R.id.token_et)).setText(authToken);
-            }
-
-            String authKey = bundle.getString(KEY_AUTH_KEY);
-            if (authKey != null) {
-                ((EditText) findViewById(R.id.key_et)).setText(authKey);
-            }
-
-            String commandId = bundle.getString(KEY_COMMAND_ID);
-            if (commandId != null) {
-                ((EditText) findViewById(R.id.command_id_et)).setText(commandId);
-            }
-
-            String eventId = bundle.getString(KEY_EVENT_ID);
-            if (eventId != null) {
-                ((EditText) findViewById(R.id.event_id_et)).setText(eventId);
-            }
-
-            String connectionType = bundle.getString(KEY_CONNECTION_PROTOCOL);
-            if (connectionType != null) {
-                List<String> connectionTypeItems = Arrays.asList(getResources().getStringArray(R.array.connection_types));
-                int position = connectionTypeItems.indexOf(connectionType);
-                ((Spinner) findViewById(R.id.connection_protocol_spinner)).setSelection(position);
-
-            }
-
+        String appId = bundle.getString(KEY_APPLICATION_ID);
+        if (appId != null) {
+            ((EditText) findViewById(R.id.app_id_et)).setText(appId);
         }
 
+        String authToken = bundle.getString(KEY_AUTH_TOKEN);
+        if (authToken != null) {
+            ((EditText) findViewById(R.id.token_et)).setText(authToken);
+        }
+
+        String authKey = bundle.getString(KEY_AUTH_KEY);
+        if (authKey != null) {
+            ((EditText) findViewById(R.id.key_et)).setText(authKey);
+        }
+
+        String commandId = bundle.getString(KEY_COMMAND_ID);
+        if (commandId != null) {
+            ((EditText) findViewById(R.id.command_id_et)).setText(commandId);
+        }
+
+        String eventId = bundle.getString(KEY_EVENT_ID);
+        if (eventId != null) {
+            ((EditText) findViewById(R.id.event_id_et)).setText(eventId);
+        }
+
+        String connectionType = bundle.getString(KEY_CONNECTION_PROTOCOL);
+        if (connectionType != null) {
+            List<String> connectionTypeItems = Arrays.asList(getResources().getStringArray(R.array.connection_types));
+            int position = connectionTypeItems.indexOf(connectionType);
+            ((Spinner) findViewById(R.id.connection_protocol_spinner)).setSelection(position);
+        }
     }
 
     private boolean areFieldsFilled() {
@@ -251,3 +223,4 @@ public class CloudSettingsActivity extends AppCompatActivity {
         return true;
     }
 }
+

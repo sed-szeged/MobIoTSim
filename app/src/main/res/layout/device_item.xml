@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:weightSum="1">
-
+<!--
       <LinearLayout
         android:id="@+id/on_off_container"
         android:layout_width="wrap_content"
@@ -30,6 +32,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large" />
 
     </LinearLayout>
+-->
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -45,6 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.57"
             android:text="@string/device_id_alt"
+            android:textSize="12sp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <LinearLayout
@@ -55,30 +59,101 @@
                 android:id="@+id/subdevices_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/subdevices" />
+                android:text="@string/subdevices"
+                android:textSize="12sp"/>
 
             <TextView
                 android:id="@+id/subdevices_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0" />
+                android:text="0"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/on_off_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible" >
+            <TextView
+                android:id="@+id/on_devices_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:text="ON:"
+                android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large" />
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+
+            <TextView
+                android:id="@+id/off_devices_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="OFF:"
+                android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large" />
         </LinearLayout>
     </LinearLayout>
 
 
-    <View
-        android:layout_width="1dp"
-        android:layout_height="50dp" />
-
-    <ImageView
-        android:id="@+id/warning"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_margin="4dp"
-        android:src="@drawable/red_warning"
-        android:visibility="gone" />
 
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentRight="true">
+
+        <ImageView
+                android:id="@+id/warning"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_margin="4dp"
+                android:src="@drawable/red_warning"
+                android:visibility="gone" />
+
+        <ImageButton
+                android:id="@+id/start_device_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:elevation="6dp"
+                android:src="@drawable/ic_btn_start_device"
+                tools:layout_editor_absoluteX="412dp" />
+
+        <ImageButton
+                android:id="@+id/edit_device_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:elevation="6dp"
+                android:src="@drawable/ic_btn_edit_device"
+                tools:layout_editor_absoluteX="412dp" />
+
+        <ImageButton
+                android:id="@+id/chart_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:elevation="6dp"
+                android:src="@drawable/ic_btn_chart_device"
+                tools:layout_editor_absoluteX="412dp" />
+
+        <ImageButton
+                android:id="@+id/delete_device_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:elevation="6dp"
+                android:src="@drawable/ic_btn_delete_device"
+                tools:layout_editor_absoluteX="412dp" />
+    </LinearLayout>
+
+
+    <!--
     <Button
         android:id="@+id/start_btn"
         android:layout_width="wrap_content"
@@ -100,5 +175,6 @@
         android:layout_height="40dp"
         android:layout_margin="4dp"
         android:background="@android:drawable/ic_delete" />
+-->
 
-</LinearLayout>
+</RelativeLayout>

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
@@ -15,8 +14,10 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,10 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DeviceSettingsActivity;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.device.DevicesFragment;
+import sed.inf.u_szeged.hu.androidiotsimulator.activity.main.IoTSimulatorActivity;
+import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.GsonDevice;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.device.Sensor;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.openweather.OpenweatherTrace;
@@ -35,29 +37,38 @@ import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.Finis
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.Parameter;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.ParameterWrapper;
 
+import static sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication.getActivity;
+import static sed.inf.u_szeged.hu.androidiotsimulator.activity.chart.ChartActivity.chartMaxEntries;
+
 public class Device implements Runnable, MqttCallback {
 
-    volatile boolean isRunning = false;
+    private volatile boolean isRunning = false;
     private Gson gson = new Gson();
+
+
     private String type;
+    private String password;
+    private String deviceID;
+    private String topics;
+
     @Expose
     private MqttClient client;
     @Expose
-    private
-    Random random;
-    private String organizationID;
-    private String typeID;
-    private String deviceID;
+    private Random random;
+    //private String organizationID;
+    //private String typeID;
+
     private String token;
     // TODO: remove this two
-    private String commandID;
-    private String eventID;
+    //private String commandID;
+    //private String eventID;
     //data generation
     private String traceFileLocation;
     //String format;
     private boolean warning = false;
     private int[] prevValue;
     private int numOfDevices;
+
     private double freq;
     private SensorDataWrapper sensors;
     private boolean isOn = false;
@@ -69,18 +80,22 @@ public class Device implements Runnable, MqttCallback {
     private boolean hasTraceData;
     private OpenweatherTrace openweatherTraceData;
 
+    private ArrayList<String> dataSent = new ArrayList();
+
     public Device(Device copyDevice) {
         this.isRunning = copyDevice.isRunning();
         this.gson = copyDevice.getGson();
         this.type = copyDevice.getType();
+        this.topics = copyDevice.getTopics();
+        this.password = copyDevice.getPassword();
         this.client = copyDevice.getClient();
         this.random = copyDevice.getRandom();
-        this.organizationID = copyDevice.getOrganizationID();
-        this.typeID = copyDevice.getTypeID();
+        //this.organizationID = copyDevice.getOrganizationID();
+        //this.typeID = copyDevice.getTypeID();
         this.deviceID = copyDevice.getDeviceID();
         this.token = copyDevice.getToken();
-        this.commandID = copyDevice.getCommandID();
-        this.eventID = copyDevice.getEventID();
+        //this.commandID = copyDevice.getCommandID();
+        //this.eventID = copyDevice.getEventID();
         this.traceFileLocation = copyDevice.getTraceFileLocation();
         this.warning = copyDevice.getWarning();
         this.prevValue = copyDevice.getPrevValue();
@@ -94,12 +109,14 @@ public class Device implements Runnable, MqttCallback {
         this.saveTrace = copyDevice.isSaveTrace();
     }
 
-    public Device(String organizationID, String typeID, String deviceID, String token, String type, double freq, SensorDataWrapper sensors, String traceFileLocation, int numOfDevices, boolean saveTrace) {
-        this.organizationID = organizationID;
+    public Device(String deviceID, String password, String topics, String token, String type, double freq, SensorDataWrapper sensors, String traceFileLocation, int numOfDevices, boolean saveTrace) {
+        //this.organizationID = organizationID;
         this.token = token;
-        this.typeID = typeID;
+        //this.typeID = typeID;
         this.type = type;
         this.deviceID = deviceID;
+        this.password = password;
+        this.topics = topics;
         this.prevValue = new int[sensors.getList().size()];
         this.freq = freq;
         this.sensors = sensors;
@@ -118,9 +135,11 @@ public class Device implements Runnable, MqttCallback {
     public static Device fromSerial(String str) {
         StringTokenizer st = new StringTokenizer(str, "|");
 
-        String organizationID = st.nextToken();
-        String typeID = st.nextToken();
+        //String organizationID = st.nextToken();
+        //String typeID = st.nextToken();
         String deviceID = st.nextToken();
+        String password = st.nextToken();
+        String topics = st.nextToken();
         String token = st.nextToken();
         String type = st.nextToken();
         double freq = Double.parseDouble(st.nextToken());
@@ -129,15 +148,16 @@ public class Device implements Runnable, MqttCallback {
         int numOfDevices = Integer.parseInt(st.nextToken());
         boolean saveTrace = Boolean.parseBoolean(st.nextToken());
 
-        Device d = new Device(organizationID, typeID, deviceID, token, type, freq, sensorDataWrapper, traceFileLocation, numOfDevices, saveTrace);
-        return d;
+        return new Device(deviceID,password,topics, token, type, freq, sensorDataWrapper, traceFileLocation, numOfDevices, saveTrace);
     }
 
     public static Device fromJson(GsonDevice gsonDevice) {
 
-        String organizationID = gsonDevice.getOrganizationId();
-        String typeID = gsonDevice.getTypeId();
+        //String organizationID = gsonDevice.getOrganizationId();
+        //String typeID = gsonDevice.getTypeId();
         String deviceID = gsonDevice.getDeviceId();
+        String password = gsonDevice.getPassword();
+        String topics = gsonDevice.getTopics();
         String token = gsonDevice.getToken();
         String type = gsonDevice.getType();
         double freq = Double.parseDouble(String.valueOf(gsonDevice.getFreq()));
@@ -149,32 +169,24 @@ public class Device implements Runnable, MqttCallback {
             SensorData sd = new SensorData(s.getName(), String.valueOf(s.getMin()), String.valueOf(s.getMax()));
             sensorDataWrapper.addSensor(sd);
         }
-
         String traceFileLocation = gsonDevice.getTraceFileLocation();
-
-        Device d = new Device(organizationID, typeID, deviceID, token, type, freq, sensorDataWrapper, traceFileLocation, numOfDevices, saveTrace);
-        return d;
-
+        return new Device(deviceID,password, topics, token, type, freq, sensorDataWrapper, traceFileLocation, numOfDevices, saveTrace);
     }
 
 
     @Override
     public void run() {
-        bluemixQuickstartConnect();
-        isRunning = true;
-        isOn = true;
-        client.setCallback(this);
-
-        if (!organizationID.equals("quickstart")) {
-            bluemixQuickstartSubscribe();
+        AWSConnect();
+        this.isRunning = true;
+        this.isOn = true;
+        if(this.client != null){
+            this.client.setCallback(this);
         }
 
-
-        clog = new FinishedTrace();
-        while (isRunning) {
+        this.clog = new FinishedTrace();
+        while (this.isRunning) {
             try {
-                bluemixQuickstartSend();
-
+                AWSSend();
                 Thread.currentThread().sleep((long) (freq * 1000));
 
             } catch (InterruptedException e) {
@@ -183,80 +195,47 @@ public class Device implements Runnable, MqttCallback {
         }
     }
 
-    private void bluemixQuickstartSubscribe() {
-        String s = "iot-2/cmd/" + commandID + "/fmt/json";
-        try {
-            client.subscribe(s);
-            System.out.println("subscribed to: " + s);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+    private void tryToStopClient() {
+      if (client != null ) {
+          try {
+              client.disconnect();
+          } catch (MqttException e) {
+              e.printStackTrace();
+          }
+          client = null;
+      }
     }
 
     public void stop(Context ctx) {
-        isRunning = false;
+        this.isRunning = false;
         if (traceFileLocation.equals("random")) {
             //saveLog(ctx);
         }
+        tryToStopClient();
     }
 
+    private void AWSConnect() {
+        final String brokerUrl = "tcp://ec2-3-81-18-150.compute-1.amazonaws.com:1883";
+        String clientId = "";
 
-    public void bluemixQuickstartConnect() {
-        //String broker       = "tcp://quickstart.messaging.internetofthings.ibmcloud.com:1883";
-        //String broker       = "tcp://quickstart.messaging.internetofthings.ibmcloud.com:1883";
-
-        commandID = MobIoTApplication.loadData(CloudSettingsActivity.KEY_COMMAND_ID);
-        System.out.println("commandID:" + commandID);
-
-        eventID = MobIoTApplication.loadData(CloudSettingsActivity.KEY_EVENT_ID);
-        System.out.println("eventID:" + eventID);
-
-        //TODO SSL
-        //https://console.bluemix.net/docs/services/IoT/reference/security/connect_devices_apps_gw.html#client_port_security
-        String broker_prefix = "tcp://";
-        String broker_suffix = ".messaging.internetofthings.ibmcloud.com:8883";
-        String broker = broker_prefix + organizationID + broker_suffix;
-
-
-        //String clientId     = "d:quickstart:myDeviceType:myDeviceID";
-        //String clientId     = "d:wg3go6:myDeviceType:myDeviceID";
-        //String clientId     = "d:quickstart:myDeviceType:myDeviceID";
-        // d:org_id:type_id:device_id
-
-        String clientId = "d:" + organizationID + ":" + typeID + ":" + deviceID;
+        tryToStopClient();
 
         try {
-            if (client != null) {
-                try {
-                    client.disconnect();
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
-                client = null;
-            }
-
-            client = new MqttClient(broker, clientId, null);
-
+            client = new MqttClient(brokerUrl, clientId, null);
             //TODO
             //client.setCallback(this);
 
-            //client.setCallback(IoTSimulatorActivity.this);
             MqttConnectOptions connOpts = new MqttConnectOptions();
 
             connOpts.setCleanSession(true);
             //connOpts.setKeepAliveInterval(30);
 
+            connOpts.setUserName(deviceID);
 
-            connOpts.setUserName("use-token-auth");
-            connOpts.setPassword(token.toCharArray());
+            connOpts.setPassword(password.toCharArray());
 
-
-            System.out.println("Connecting to broker: " + broker);
+            System.out.println("Connecting to broker: " + brokerUrl);
             client.connect(connOpts);
-            System.out.println("Connected");
-
-            //client.disconnect();
-            //System.out.println("Disconnected");
 
         } catch (MqttException me) {
             System.out.println("| reason " + me.getReasonCode());
@@ -267,22 +246,26 @@ public class Device implements Runnable, MqttCallback {
             me.printStackTrace();
         }
     }
+    private String getTypeAndTopic(){
+        String outText="";
+        if (topics.contains("{  \"public/#\": \"r\",  \"/device/")){
+           int startSubstring = topics.indexOf("/device/");
+            int endSubstring = topics.indexOf("#\": \"rw\"}");
+            outText = topics.substring(startSubstring,endSubstring);
+        }
+        return outText;
+    }
 
-    public void bluemixQuickstartSend() {
-        //String topic        = "iot-2/type/iotqs-sensor/id/myDeviceID/evt/status/fmt/json";
-        //String topic        = "iot-2/evt/iotsensor/fmt/jon";
-        String topic = "iot-2/evt/" + eventID + "/fmt/json";
+    public void AWSSend() {
 
+        if(client == null) {return;}
 
-        // int value = dataGenerator();
-
+        String publishTopic = getTypeAndTopic();
         StringBuilder newContent = new StringBuilder();
-
 
         if (type.equals("Weathergroup")) {
 
             String txt = DataGenerator.getNextWeatherGroupRandomMsg();
-            System.out.println(txt);
             newContent.append(txt);
         } else {
 
@@ -325,7 +308,7 @@ public class Device implements Runnable, MqttCallback {
                     output.setCharAt(charPos, ' ');
 
 
-                    System.out.println(output.toString());
+                //  System.out.println(output.toString());
                     newContent.append(output.toString());
 
                     traceCounter++;
@@ -338,7 +321,7 @@ public class Device implements Runnable, MqttCallback {
 
                     StringBuilder output = new StringBuilder();
                     output.append(new Gson().toJson(openweatherTraceData.getCycles().get(i).getList().get(deviceNum), Map.class));
-                    System.out.println("GSON FIX TEST:" + new Gson().toJson(openweatherTraceData.getCycles().get(i).getList().get(deviceNum), Map.class));
+                    //stem.out.println("GSON FIX TEST:" + new Gson().toJson(openweatherTraceData.getCycles().get(i).getList().get(deviceNum), Map.class));
 
 
                     output.deleteCharAt(0);
@@ -348,31 +331,26 @@ public class Device implements Runnable, MqttCallback {
                     traceCounter++;
                 }
             }
-
             newContent.append(" } }");
-
         }
-        //newContent.append("\"main\": {\"temp\": 8,\"pressure\": 1020,\"humidity\": 75,\"temp_min\": 8,\"temp_max\": 8\t}");
-
-
-        //String content = "{ \"d\" : { \"data\" : " + value + " } }";
-
 
         try {
             MqttMessage message = new MqttMessage(newContent.toString().getBytes());
             message.setQos(0);
+            if(dataSent.size()<chartMaxEntries){
+                dataSent.add(newContent.toString());
+            }
+           System.out.println("before publish isConnected " + client.isConnected());
+            client.publish(publishTopic, message);
+            System.out.println("after publish isConnected " + client.isConnected());
 
-            System.out.println("before publish isConnected " + client.isConnected());
-            client.publish(topic, message);
-            System.out.println("isConnected " + client.isConnected());
-
-            System.out.println("Message published " + newContent + " TO " + topic);
+            System.out.println("Message published " + newContent + " TO " + publishTopic);
         } catch (MqttException me) {
             System.out.println("| reason " + me.getReasonCode());
-            System.out.println("| msg " + me.getMessage());
-            System.out.println("| loc " + me.getLocalizedMessage());
-            System.out.println("| cause " + me.getCause());
-            System.out.println("| excep " + me);
+          System.out.println("| msg " + me.getMessage());
+          System.out.println("| loc " + me.getLocalizedMessage());
+           System.out.println("| cause " + me.getCause());
+          System.out.println("| excep " + me);
             me.printStackTrace();
         }
     }
@@ -380,7 +358,7 @@ public class Device implements Runnable, MqttCallback {
     private int dataGenerator(int pos, int min, int max) {
         int diff = random.nextInt(3);
 
-        System.out.println(type);
+        //System.out.println(type);
         if (Objects.equals(type, "Thermostat")) {
 
             if (prevValue[pos] <= 10) {
@@ -391,7 +369,7 @@ public class Device implements Runnable, MqttCallback {
                 isOn = false;
             }
 
-            System.out.println("isOn: " + isOn);
+           // System.out.println("isOn: " + isOn);
 
             //TODO: make this not caling it at every call
             new AsyncTask<Void, Void, Void>() {
@@ -404,19 +382,21 @@ public class Device implements Runnable, MqttCallback {
                 @Override
                 protected void onPostExecute(Void o) {
                     //Toast.makeText(MobIoTApplication.getActivity(), dID + " command: " + cmd, Toast.LENGTH_LONG).show();
-                    if (MobIoTApplication.getActivity() instanceof DevicesActivity) {
+                    if (getActivity() instanceof IoTSimulatorActivity) {
                         Message msg = new Message();
-                        msg.what = DevicesActivity.MSG_W_SWITCH;
+                        msg.what = DevicesFragment.MSG_W_SWITCH;
                         Bundle bundle = new Bundle();
-                        bundle.putString(DeviceSettingsActivity.KEY_TYPE_ID, typeID);
+                        //bundle.putString(DeviceSettingsActivity.KEY_TYPE_ID, typeID);
                         bundle.putString(DeviceSettingsActivity.KEY_DEVICE_ID, deviceID);
+                        bundle.putString(DeviceSettingsActivity.KEY_PASSWORD, password);
+                        bundle.putString(DeviceSettingsActivity.KEY_TOPICS, topics);
                         bundle.putString(DeviceSettingsActivity.KEY_TOKEN, token);
                         bundle.putString(DeviceSettingsActivity.KEY_FREQ, String.valueOf(freq));
                         bundle.putString(DeviceSettingsActivity.KEY_SENSORS, sensors.toString());
                         bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, traceFileLocation);
                         bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(saveTrace));
                         msg.setData(bundle);
-                        msg.setTarget(((DevicesActivity) MobIoTApplication.getActivity()).handler);
+                        msg.setTarget(((IoTSimulatorActivity) getActivity()).handler);
                         msg.sendToTarget();
                     }
                 }
@@ -453,12 +433,8 @@ public class Device implements Runnable, MqttCallback {
         return deviceID;
     }
 
-    public String getTypeID() {
-        return typeID;
-    }
-
     public boolean isRunning() {
-        return isRunning;
+        return this.isRunning;
     }
 
     public boolean isWarning() {
@@ -469,16 +445,19 @@ public class Device implements Runnable, MqttCallback {
         this.warning = w;
     }
 
-    public String getOrganizationID() {
-        return organizationID;
-    }
-
     public String getToken() {
         return token;
     }
 
     public String getType() {
         return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setTraceFileLocation(String traceFileLocation) {
+        this.traceFileLocation = traceFileLocation;
     }
 
     public String getTraceFileLocation() {
@@ -489,9 +468,18 @@ public class Device implements Runnable, MqttCallback {
         return freq;
     }
 
+    public void setFreq(double freq) {
+        this.freq = freq;
+    }
+
+    public void setSensors(SensorDataWrapper sensors) {
+        this.sensors = sensors;
+    }
+
     public SensorDataWrapper getSensors() {
         return sensors;
     }
+
 
     public boolean isOn() {
         return isOn;
@@ -518,9 +506,10 @@ public class Device implements Runnable, MqttCallback {
         System.out.println("messageArrived topic:" + topic +
                 "\nmessage:" + payload);
 
-        if (topic.equals("iot-2/cmd/" + commandID
+        /*if (topic.equals("iot-2/cmd/" + commandID
                 + "/fmt/json")) {
-
+*/
+        if (topic.equals("iot-2/cmd/fmt/json")) {
             final String dID = deviceID;
 
             JSONObject jsonObject = new JSONObject(payload);
@@ -537,12 +526,12 @@ public class Device implements Runnable, MqttCallback {
 
                 @Override
                 protected void onPostExecute(Void o) {
-                    Toast.makeText(MobIoTApplication.getActivity(), dID + " command: " + cmd, Toast.LENGTH_LONG).show();
-                    if (MobIoTApplication.getActivity() instanceof DevicesActivity) {
+                    //Toast.makeText(MobIoTApplication.getActivity(), dID + " command: " + cmd, Toast.LENGTH_LONG).show();
+                    if (getActivity() instanceof IoTSimulatorActivity) {
                         Message msg = new Message();
-                        msg.what = DevicesActivity.MSG_W_WARNING;
+                        msg.what = DevicesFragment.MSG_W_WARNING;
                         Bundle bundle = new Bundle();
-                        bundle.putString(DeviceSettingsActivity.KEY_TYPE_ID, typeID);
+                        //bundle.putString(DeviceSettingsActivity.KEY_TYPE_ID, typeID);
                         bundle.putString(DeviceSettingsActivity.KEY_DEVICE_ID, deviceID);
                         bundle.putString(DeviceSettingsActivity.KEY_TOKEN, token);
 
@@ -551,7 +540,7 @@ public class Device implements Runnable, MqttCallback {
                         bundle.putString(DeviceSettingsActivity.KEY_TRACE_LOCATION, traceFileLocation);
                         bundle.putString(DeviceSettingsActivity.KEY_SAVE_TRACE, String.valueOf(saveTrace));
                         msg.setData(bundle);
-                        msg.setTarget(((DevicesActivity) MobIoTApplication.getActivity()).handler);
+                        msg.setTarget(((IoTSimulatorActivity) getActivity()).handler);
                         msg.sendToTarget();
                     }
                 }
@@ -571,7 +560,11 @@ public class Device implements Runnable, MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
-        System.out.println("deliveryComplete token:" + token.toString());
+        try {
+            System.out.println("deliveryComplete token:" + token.getMessage().toString());
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -582,7 +575,7 @@ public class Device implements Runnable, MqttCallback {
         }
         if (o instanceof Device) {
             Device other = (Device) o;
-            if (other.getOrganizationID() != null) {
+            /*if (other.getOrganizationID() != null) {
                 if (!other.getOrganizationID().equals(organizationID)) {
                     return false;
                 }
@@ -595,8 +588,14 @@ public class Device implements Runnable, MqttCallback {
             }
             if (!other.getTypeID().equals(typeID)) {
                 return false;
-            }
+            }*/
             if (!other.getDeviceID().equals(deviceID)) {
+                return false;
+            }
+            if (!other.getPassword().equals(password)) {
+                return false;
+            }
+            if (!other.getTopics().equals(topics)) {
                 return false;
             }
             if (!other.getToken().equals(token)) {
@@ -629,11 +628,11 @@ public class Device implements Runnable, MqttCallback {
 
     public String getSerial() {
         StringBuilder sb = new StringBuilder();
-        sb.append(organizationID);
-        sb.append("|");
-        sb.append(typeID);
-        sb.append("|");
         sb.append(deviceID);
+        sb.append("|");
+        sb.append(password);
+        sb.append("|");
+        sb.append(topics);
         sb.append("|");
         sb.append(token);
         sb.append("|");
@@ -656,9 +655,11 @@ public class Device implements Runnable, MqttCallback {
     }
 
 
-    public Gson getGson() {
-        return gson;
-    }
+    public Gson getGson() { return gson;  }
+
+    public String getPassword() { return password;  }
+
+    public void setPassword(String password) { this.password = password; }
 
     public MqttClient getClient() {
         return client;
@@ -666,14 +667,6 @@ public class Device implements Runnable, MqttCallback {
 
     public Random getRandom() {
         return random;
-    }
-
-    public String getCommandID() {
-        return commandID;
-    }
-
-    public String getEventID() {
-        return eventID;
     }
 
     public int[] getPrevValue() {
@@ -716,6 +709,10 @@ public class Device implements Runnable, MqttCallback {
         return isRunning;
     }
 
+    public String getTopics() { return topics; }
+
+    public void setTopics(String topics) { this.topics = topics; }
+
     public int getNumOfDevices() {
         return numOfDevices;
     }
@@ -740,12 +737,10 @@ public class Device implements Runnable, MqttCallback {
                 ", type='" + type + '\'' +
                 ", client=" + client +
                 ", random=" + random +
-                ", organizationID='" + organizationID + '\'' +
-                ", typeID='" + typeID + '\'' +
                 ", deviceID='" + deviceID + '\'' +
+                ", password='" + password + '\'' +
+                ", topics='" + topics + '\'' +
                 ", token='" + token + '\'' +
-                ", commandID='" + commandID + '\'' +
-                ", eventID='" + eventID + '\'' +
                 ", traceFileLocation='" + traceFileLocation + '\'' +
                 ", warning=" + warning +
                 ", prevValue=" + Arrays.toString(prevValue) +
@@ -759,4 +754,74 @@ public class Device implements Runnable, MqttCallback {
                 '}';
     }
 
+    public void uploadDevice(Context context){
+
+        RESTTools restTools = new RESTTools(context);
+
+        JSONObject jsonDevice= new JSONObject();
+        try {
+            jsonDevice.put("name", this.deviceID);
+            jsonDevice.put("password", this.password);
+            jsonDevice.put("type", this.type);
+            jsonDevice.put("topics", this.topics);
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        restTools.addDevice(jsonDevice);
+    }
+
+    public void updateDeviceInCloud(Context context,  String deviceKey ){
+
+        RESTTools restTools = new RESTTools(context);
+
+        JSONObject jsonDevice= new JSONObject();
+        try {
+            jsonDevice.put("name", this.deviceID);
+            jsonDevice.put("password", this.password);
+            jsonDevice.put("type", this.type);
+            jsonDevice.put("topics", this.topics);
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        restTools.updateDevice(jsonDevice, deviceKey);
+    }
+
+    public String getDeviceKeyFromSharedPref(Device oldDevice){
+        String devKeysRaw = MobIoTApplication.loadData(MobIoTApplication.KEY_DEVICEKEYS);
+
+        String deviceKey = "";
+        String oldDeviceId = oldDevice.getDeviceID();
+
+
+        if (devKeysRaw != null && !devKeysRaw.equals("")) {
+            StringTokenizer devicesSt = new StringTokenizer(devKeysRaw, "<");
+
+            while (devicesSt.hasMoreTokens()) {
+                String device = devicesSt.nextToken();
+                System.out.println(device);
+                StringTokenizer deviceSt = new StringTokenizer(device, "|");
+                boolean deviceFound = false;
+                while (deviceSt.hasMoreTokens()) {
+                    String deviceInfo = deviceSt.nextToken();
+
+                    if (deviceInfo.equals(oldDeviceId) && !deviceFound) {
+                        deviceFound = true;
+                        System.out.println(deviceInfo);
+                    } else if (deviceFound) {
+                        deviceKey = deviceInfo;
+                        deviceFound = false;
+                    }
+                }
+            }
+        }
+        return deviceKey;
+    }
+    public ArrayList<String> getDataSent (){
+        return this.dataSent;
+    }
 }
+

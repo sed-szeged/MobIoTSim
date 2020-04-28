@@ -2,11 +2,6 @@ package sed.inf.u_szeged.hu.androidiotsimulator.model.device;
 
 import java.util.StringTokenizer;
 
-/**
- * Created by tommy on 11/13/2016. Project name: MobIoTSim-mirrored
- *  
- */
-
 public class SensorData {
 
     private String name;
