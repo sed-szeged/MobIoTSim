@@ -10,22 +10,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.StringTokenizer;
 
 import sed.inf.u_szeged.hu.androidiotsimulator.MobIoTApplication;
-import sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudSettingsActivity;
 import sed.inf.u_szeged.hu.androidiotsimulator.controller.RESTTools;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.openweather.OpenweatherTrace;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.FinishedTrace;
 import sed.inf.u_szeged.hu.androidiotsimulator.model.gson.trace.randomdata.TraceGroup;
-import sed.inf.u_szeged.hu.androidiotsimulator.model.json.BulkDevice;
 
-/**
- * Created by tommy on 2/27/2017. Project name: MobIoTSim-mirrored
- *  
- */
+import static sed.inf.u_szeged.hu.androidiotsimulator.activity.main.IoTSimulatorActivity.deviceKeysBuffer;
+
+
 public class DeviceGroup {
 
     private static final String GENERIC_DEVICE_TRACE = "generic_device_with_parameters";
@@ -48,7 +49,6 @@ public class DeviceGroup {
 
             if (!Objects.equals(baseDevice.getTraceFileLocation(), "random")) {
                 if (isGenericTrace()) {
-                    //String jsonStr = getJsonStr();
                     newDevice.setHasTraceData(true);
                     newDevice.setTraceCounter(0);
                 } else {
@@ -59,12 +59,8 @@ public class DeviceGroup {
             } else {
                 newDevice.setHasTraceData(false);
             }
-
-
             devicesList.add(newDevice);
         }
-
-        saveToCloud();
     }
 
 
@@ -111,23 +107,23 @@ public class DeviceGroup {
         return result;
     }
 
-    private void saveToCloud() {
-        String finalJson = "[";
-
-        for (int i = 0; i < devicesList.size() - 1; i++) {
-            BulkDevice bulkDevice = new BulkDevice(devicesList.get(i));
-            finalJson += bulkDevice.getAddJsonCode() + ",";
+    public void uploadDeviceGroup(Context context){
+        for (Device dev:  devicesList) {
+            dev.uploadDevice(context);
         }
-        BulkDevice lastDevice = new BulkDevice(devicesList.get(devicesList.size() - 1));
-        finalJson += lastDevice.getAddJsonCode();
-        finalJson += "]";
+    }
 
-        String auth_key = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_KEY);
-        String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
-        String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
+    public void updateDeviceGroup(Device editedDeviceData, Context context ){
 
-        RESTTools restTools = new RESTTools(orgId, auth_key, auth_token, context);
-        restTools.addDevices(finalJson);
+        for(int i=0;i<devicesList.size();i++){
+            Device dev = devicesList.get(i);
+            String deviceKey = dev.getDeviceKeyFromSharedPref(dev);
+            dev.setDeviceID(editedDeviceData.getDeviceID()+"_"+generateIdNumber(i));
+            dev.setType(editedDeviceData.getType());
+            dev.setPassword(editedDeviceData.getPassword());
+            dev.setTopics(editedDeviceData.getTopics());
+            dev.updateDeviceInCloud(context,deviceKey);
+        }
     }
 
     private void saveTraceToJson(Context ctx) {
@@ -143,29 +139,75 @@ public class DeviceGroup {
             fos.write(outputString.getBytes());
             fos.close();
             Toast.makeText(ctx, "File saved: " + fileName, Toast.LENGTH_SHORT).show();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void removeFromCloud() {
-        String finalJson = "[";
+    public void updateDeviceKeysInSharedPreferences (Device originalDevice,Device editedDevice, Context context){//updateInSharedPreferences
+        String devKeysRaw = MobIoTApplication.loadData(MobIoTApplication.KEY_DEVICEKEYS);
 
-        for (int i = 0; i < devicesList.size() - 1; i++) {
-            BulkDevice bulkDevice = new BulkDevice(devicesList.get(i));
-            finalJson += bulkDevice.getRemoveJsonCode() + ",";
+        for(int i=0; i<devicesList.size();i++){
+            String  generatedId = generateIdNumber(i);
+            String oldDeviceGroupId = originalDevice.getDeviceID()+"_"+generatedId;
+            String editedDeviceId = editedDevice.getDeviceID()+"_"+generatedId;
+            devKeysRaw = MobIoTApplication.updateDevicesKeys(devKeysRaw,oldDeviceGroupId,editedDeviceId);
+
+            devicesList.get(i).setDeviceID(editedDeviceId);
+            devicesList.get(i).setType(editedDevice.getType());
+            devicesList.get(i).setPassword(editedDevice.getPassword());
+            devicesList.get(i).setTopics(editedDevice.getTopics());
+
         }
-        BulkDevice lastDevice = new BulkDevice(devicesList.get(devicesList.size() - 1));
-        finalJson += lastDevice.getRemoveJsonCode();
-        finalJson += "]";
+        MobIoTApplication.deleteKey(MobIoTApplication.KEY_DEVICEKEYS);
+        MobIoTApplication.saveData(MobIoTApplication.KEY_DEVICEKEYS,devKeysRaw);
+    }
 
-        String auth_key = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_KEY);
-        String auth_token = MobIoTApplication.loadData(CloudSettingsActivity.KEY_AUTH_TOKEN);
-        String orgId = MobIoTApplication.loadData(CloudSettingsActivity.KEY_ORGANIZATION_ID);
+    public void removeFromCloud() { //collect devicekeys of selected deviceGroup from SP and buffer
+        String[] sb = null;
 
-        RESTTools restTools = new RESTTools(orgId, auth_key, auth_token, context);
-        restTools.removeDevice(finalJson);
+        String devKeysRaw = MobIoTApplication.loadData(MobIoTApplication.KEY_DEVICEKEYS);
+
+        System.out.println("DEVKEYSRAW: " + devKeysRaw);
+
+        HashSet<String> deviceKeys = new HashSet<>();
+        ArrayList<String> deviceIdsFromList = new ArrayList<String>();
+        for (int i = 0; i < devicesList.size(); i++) {
+            deviceIdsFromList.add(devicesList.get(i).getDeviceID());
+
+        if (devKeysRaw != null && !devKeysRaw.equals("")) {
+            StringTokenizer devicesSt = new StringTokenizer(devKeysRaw, "<");
+
+            while (devicesSt.hasMoreTokens()) {
+                String device = devicesSt.nextToken();
+                System.out.println(device);
+                StringTokenizer deviceSt = new StringTokenizer(device, "|");
+                boolean deviceFound = false;
+                while (deviceSt.hasMoreTokens()) {
+                    String deviceInfo = deviceSt.nextToken();
+
+                    if (deviceInfo.equals(deviceIdsFromList.get(i)) && !deviceFound) {
+                        deviceFound = true;
+                        System.out.println(deviceInfo);
+                    }else if(deviceFound){
+                        deviceKeys.add(deviceInfo);
+                        deviceFound = false;
+                    }
+                }
+            }
+        }
+        for(Map.Entry<String,String> deviceData: deviceKeysBuffer.entrySet()){
+            if(deviceData.getKey().equals(devicesList.get(i).getDeviceID())){
+                deviceKeys.add(deviceData.getValue());
+            }
+        }
+    }
+
+
+        System.out.println("SB ARRAY TO STRING: ");
+        System.out.println(Arrays.toString(sb));
+        RESTTools restTools = new RESTTools(sb, context);
+        restTools.removeDevice(deviceKeys);
     }
 
     public boolean isWarning() {
@@ -207,7 +249,6 @@ public class DeviceGroup {
             e.printStackTrace();
         }
         return jsonStr;
-
     }
 
     private OpenweatherTrace getOpenWeatherDatas(String jsonStr) {
@@ -239,7 +280,7 @@ public class DeviceGroup {
         return result;
     }
 
-    public ArrayList<Device> getDevicesList() {
+    public ArrayList<Device> getDeviceGroup() {
         return devicesList;
     }
 

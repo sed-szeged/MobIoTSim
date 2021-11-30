@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".activity.cloud.CloudActivity"
+    tools:context="sed.inf.u_szeged.hu.androidiotsimulator.activity.cloud.CloudFragment"
     tools:showIn="@layout/activity_cloud">
 
     <LinearLayout
@@ -18,45 +18,11 @@
         android:orientation="vertical"
         android:weightSum="1">
 
-
-        <!--<Button-->
-            <!--android:id="@+id/new_btn"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="right"-->
-            <!--android:text="@string/new_button" />-->
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/select_cloud"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/cloud_providers_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/cloud_parameters"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textStyle="bold" />
-
         <LinearLayout
             android:id="@+id/organization_id_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:text="@string/organization_id" />
 
             <EditText
                 android:id="@+id/organization_id_et"
@@ -65,6 +31,12 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:inputType="text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/organization_id" />
         </LinearLayout>
 
         <LinearLayout
@@ -74,12 +46,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:text="@string/application_id" />
-
             <EditText
                 android:id="@+id/app_id_et"
                 android:layout_width="0dp"
@@ -87,6 +53,12 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:inputType="text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/application_id" />
         </LinearLayout>
 
         <LinearLayout
@@ -96,12 +68,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:text="@string/auth_key" />
-
             <EditText
                 android:id="@+id/key_et"
                 android:layout_width="0dp"
@@ -109,20 +75,19 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:inputType="text" />
-        </LinearLayout>
-
-        <LinearLayout
-
-            android:id="@+id/token_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:text="@string/auth_token" />
+                android:text="@string/auth_key" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/token_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/token_et"
@@ -131,6 +96,12 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:inputType="text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/auth_token" />
         </LinearLayout>
 
         <LinearLayout
@@ -140,12 +111,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:text="@string/command_id" />
-
             <EditText
                 android:id="@+id/command_id_et"
                 android:layout_width="0dp"
@@ -153,6 +118,12 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:inputType="text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/command_id" />
         </LinearLayout>
 
         <LinearLayout
@@ -162,12 +133,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:text="@string/event_id" />
-
             <EditText
                 android:id="@+id/event_id_et"
                 android:layout_width="0dp"
@@ -175,8 +140,13 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:inputType="text" />
-        </LinearLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/event_id" />
+        </LinearLayout>
 
         <LinearLayout
 
@@ -185,12 +155,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:text="@string/connection_type" />
-
             <Spinner
                 android:id="@+id/connection_type_spinner"
                 android:layout_width="wrap_content"
@@ -198,8 +162,34 @@
                 android:enabled="false"
                 android:entries="@array/connection_types" />
 
-        </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/connection_type" />
 
+        </LinearLayout>
+        <!--        <LinearLayout
+            android:id="@+id/password_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="@string/password" />
+
+            <EditText
+                android:id="@+id/password_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:inputType="text" />
+        </LinearLayout>
+-->
         <LinearLayout
             android:id="@+id/show_url_container"
             android:layout_width="match_parent"
@@ -219,29 +209,73 @@
                 android:text="@string/template_url" />
         </LinearLayout>
 
-        <RelativeLayout
+        <Spinner
+            android:id="@+id/cloud_providers_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginBottom="16dp" />
+
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/select_cloud"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cloud_parameters"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textStyle="bold" />
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/edit_btn"
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:padding="10dp"
-                android:text="@string/edit_btn" />
+                android:layout_centerInParent="true"
+                android:visibility="visible"
+                tools:visibility="visible" />
 
-            <Button
-                android:id="@+id/delete_btn"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/sign_out_and_disconnect"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_margin="10dp"
-                android:padding="10dp"
-                android:text="@string/delete_btn" />
+                android:layout_centerInParent="true"
+                android:orientation="horizontal"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-        </RelativeLayout>
+                <Button
+                    android:id="@+id/sign_out_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/sign_out"
+                    android:theme="@style/ThemeOverlay.MyDarkButton" />
+
+                <Button
+                    android:id="@+id/disconnect_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/disconnect"
+                    android:theme="@style/ThemeOverlay.MyDarkButton" />
+            </LinearLayout>
+
+
+        </LinearLayout>
 
 
     </LinearLayout>

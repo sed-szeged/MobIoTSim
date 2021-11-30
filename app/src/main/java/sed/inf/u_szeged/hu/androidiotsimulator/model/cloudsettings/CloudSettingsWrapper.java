@@ -1,7 +1,7 @@
 package sed.inf.u_szeged.hu.androidiotsimulator.model.cloudsettings;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.StringTokenizer;
 
@@ -73,6 +73,18 @@ public class CloudSettingsWrapper {
                     bundle.getString(CloudSettingsActivity.KEY_COMMAND_ID),
                     bundle.getString(CloudSettingsActivity.KEY_EVENT_ID)
             );
+        }else if (bundle.getString(CloudSettingsActivity.KEY_TYPE).equals("AWS")) {
+            cloudSettingsWrapper = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.AWS,
+                    bundle.getString(CloudSettingsActivity.KEY_NAME),
+                    bundle.getString(CloudSettingsActivity.KEY_ORGANIZATION_ID),
+                    true,
+                    1883,
+                    bundle.getString(CloudSettingsActivity.KEY_APPLICATION_ID),
+                    bundle.getString(CloudSettingsActivity.KEY_AUTH_KEY),
+                    bundle.getString(CloudSettingsActivity.KEY_AUTH_TOKEN),
+                    bundle.getString(CloudSettingsActivity.KEY_COMMAND_ID),
+                    bundle.getString(CloudSettingsActivity.KEY_EVENT_ID)
+            );
         } else {
             cloudSettingsWrapper = new CloudSettingsWrapper(CloudSettingsWrapper.CSType.BLUEMIX_DEMO);
         }
@@ -109,6 +121,7 @@ public class CloudSettingsWrapper {
         sb.append(commandID);
         sb.append("|");
         sb.append(eventID);
+
         return sb.toString();
     }
 
@@ -144,5 +157,6 @@ public class CloudSettingsWrapper {
         return eventID;
     }
 
-    public enum CSType {BLUEMIX_DEMO, BLUEMIX, AZURE}
+    public enum CSType {BLUEMIX_DEMO, BLUEMIX, AZURE, AWS}
 }
+

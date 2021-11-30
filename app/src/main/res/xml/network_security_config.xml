@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">ec2-18-222-188-169.us-east-2.compute.amazonaws.com</domain>
+        <domain includeSubdomains="true">35.233.47.26</domain>
+        <domain includeSubdomains="true">192.168.1.10.nip.io</domain>
+    </domain-config>
+</network-security-config>

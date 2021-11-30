@@ -17,6 +17,12 @@ public class GsonDevice {
     @SerializedName("deviceId")
     @Expose
     private String deviceId;
+    @SerializedName("password")
+    @Expose
+    private String password;
+    @SerializedName("topics")
+    @Expose
+    private String topics;
     @SerializedName("token")
     @Expose
     private String token;
@@ -38,6 +44,10 @@ public class GsonDevice {
     @SerializedName("saveTrace")
     @Expose
     private boolean saveTrace;
+    @SerializedName("userId")
+    @Expose
+    private String userId;
+
 
     /**
      * @return The organizationId
@@ -73,7 +83,21 @@ public class GsonDevice {
     public String getDeviceId() {
         return deviceId;
     }
+    public String getPassword() {
+        return password;
+    }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getTopics() {
+        return topics;
+    }
+
+    public void setTopics(String topics) {
+        this.topics = topics;
+    }
     /**
      * @param deviceId The deviceId
      */
@@ -172,4 +196,21 @@ public class GsonDevice {
     public void setSaveTrace(boolean saveTrace) {
         this.saveTrace = saveTrace;
     }
+
+    /**
+     * @param userId The id of the logged in user
+     */
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * @return The id of the user that the device belongs to
+     */
+    public String getUserId(){
+        return userId;
+    }
+
+
 }
+
