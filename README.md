@@ -1,9 +1,7 @@
 # MobIoTSim
 
 When using the simulator for scientific research please cite the following paper:
-[A. Kertesz, T. Pflanzner, T. Gyimothy, 
-A Mobile IoT Device Simulator for IoT-Fog-Cloud Systems. Journal of Grid 
-Computing, 2018.](https://www.researchgate.net/publication/327906907_A_Mobile_IoT_Device_Simulator_for_IoT-Fog-Cloud_Systems) DOI: [10.1007/s10723-018-9468-9](https://link.springer.com/article/10.1007/s10723-018-9468-9)
+[Kertesz A., Pflanzner T., Gyimothy T., A Mobile IoT Device Simulator for IoT-Fog-Cloud Systems. JOURNAL OF GRID COMPUTING, 17 : 3, pp. 529-551. (2019)](https://www.researchgate.net/publication/327906907_A_Mobile_IoT_Device_Simulator_for_IoT-Fog-Cloud_Systems) DOI: [10.1007/s10723-018-9468-9](https://link.springer.com/article/10.1007/s10723-018-9468-9)
 
 ### MobIoTSim with Bluemix
 
